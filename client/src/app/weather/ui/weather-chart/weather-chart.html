@@ -1,0 +1,25 @@
+@if (mobileLayout() && legendEntries().length > 0) {
+  <ul class="chart-legend" aria-label="Chart legend. Select a series to hide or show it.">
+    @for (entry of legendEntries(); track entry.datasetIndex) {
+      <li>
+        <button
+          type="button"
+          [attr.aria-pressed]="!entry.hidden"
+          [class.series-hidden]="entry.hidden"
+          (click)="toggleSeries(entry.datasetIndex)"
+        >
+          <span
+            class="legend-color"
+            [style.background-color]="entry.color"
+            aria-hidden="true"
+          ></span>
+          <span>{{ entry.text }}</span>
+        </button>
+      </li>
+    }
+  </ul>
+}
+
+<div class="chart-container" [class.mobile-chart]="mobileLayout() && graphSeries().length > 0">
+  <canvas #weatherChart></canvas>
+</div>

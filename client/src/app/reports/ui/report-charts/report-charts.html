@@ -1,0 +1,53 @@
+<section class="report-charts" aria-label="Story charts">
+  @for (chart of charts(); track chart.chartId; let chartIndex = $index) {
+    <section class="report-chart" [attr.aria-labelledby]="'report-chart-title-' + chart.chartId">
+      <div class="chart-heading">
+        <h2 [id]="'report-chart-title-' + chart.chartId">
+          {{ chart.name || 'Chart ' + (chartIndex + 1) }}
+        </h2>
+
+        <button
+          type="button"
+          class="chart-collapse-toggle"
+          [attr.aria-controls]="'report-chart-content-' + chart.chartId"
+          [attr.aria-expanded]="!collapsedCharts().has(chart)"
+          (click)="toggleChart(chart)"
+        >
+          {{ collapsedCharts().has(chart) ? 'Expand Chart' : 'Collapse Chart' }}
+        </button>
+      </div>
+
+      <div
+        class="report-chart-content"
+        [id]="'report-chart-content-' + chart.chartId"
+        [hidden]="collapsedCharts().has(chart)"
+      >
+        @if (chart.comments.trim()) {
+          <p
+            class="chart-comments"
+            [id]="'chart-comments-' + chart.chartId"
+            [class.comments-reduced]="collapsibleComments() && !expandedComments().has(chart)"
+            [class.comments-expanded]="collapsibleComments() && expandedComments().has(chart)"
+          >
+            {{ chart.comments }}
+          </p>
+          @if (collapsibleComments()) {
+            <button
+              type="button"
+              class="comments-toggle"
+              [attr.aria-controls]="'chart-comments-' + chart.chartId"
+              [attr.aria-expanded]="expandedComments().has(chart)"
+              (click)="toggleComments(chart)"
+            >
+              {{ expandedComments().has(chart) ? 'Reduce comments' : 'Expand comments' }}
+            </button>
+          }
+        }
+
+        <app-weather-chart [graphSeries]="chart.graphSeries" [chartType]="chart.chartType" />
+      </div>
+    </section>
+
+    <div class="chart-separator" aria-hidden="true"></div>
+  }
+</section>

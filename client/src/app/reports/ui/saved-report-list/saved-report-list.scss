@@ -1,0 +1,132 @@
+:host {
+  display: block;
+}
+
+.saved-reports {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 0.65rem;
+
+  background-color: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+}
+
+.saved-reports h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.saved-report-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.5rem;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.saved-report-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem;
+
+  border: 1px solid #002d7a;
+  // border: 1px solid #dbe3eb;
+  border-radius: 0.4rem;
+}
+
+.saved-report-button {
+  min-height: 32px;
+  padding: 0.3rem 0.55rem;
+
+  color: #002d7a;
+  background-color: white;
+
+  font: inherit;
+  font-size: 0.78rem;
+
+  border: 1px solid #0b64d0;
+  border-radius: 0.3rem;
+
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.publication-button,
+.gallery-link {
+  min-height: 32px;
+  padding: 0.3rem 0.5rem;
+
+  color: #475569;
+  background: white;
+  border: 1px solid #94a3b8;
+  border-radius: 0.3rem;
+
+  font: inherit;
+  font-size: 0.75rem;
+  text-decoration: none;
+
+  cursor: pointer;
+}
+
+.gallery-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+@media (hover: hover) {
+  .saved-report-button:hover {
+    background-color: #eaf5ff;
+  }
+}
+
+.saved-report-button:active {
+  transform: translateY(1px);
+}
+
+.saved-report-button:focus-visible {
+  position: relative;
+  z-index: 1;
+
+  outline: 2px solid #2aa5fc;
+  outline-offset: 2px;
+}
+
+@media (max-width: 42rem) {
+  .saved-report-button {
+    width: 100%;
+    min-height: 44px;
+
+    font-size: 0.95rem;
+    text-align: left;
+  }
+
+  .saved-report-list li {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .publication-button,
+  .gallery-link {
+    justify-content: center;
+    min-height: 44px;
+  }
+}
+
+@media (pointer: coarse) {
+  .saved-report-button {
+    min-height: 44px;
+  }
+}
+
+.saved-list-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}

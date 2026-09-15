@@ -1,0 +1,207 @@
+import { measurementOptions, measurementUnit } from '../../../weather/models/measurement.models';
+import { Component, computed, inject, input, model, output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
+import { ReportFacade } from '../../application/report-facade';
+import { DialogService } from '../../../shared/application/dialog.service';
+
+import { ReportHelpDialog } from '../report-help-dialog/report-help-dialog';
+
+import type {
+  HelpTopic,
+  ReportInput,
+  SeriesInput,
+  SharedSeriesField,
+  DateFilterField,
+} from '../../models/report-editor.models';
+
+import type { ChartType } from '../../../weather/models/chart.models';
+
+import type { QueryLocation } from '../../../locations/models/location.models';
+
+import type { GroupBy } from '../../../weather/models/analysis.models';
+
+export interface SeriesRequest {
+  chartId: number;
+  series: SeriesInput;
+}
+
+export interface ChartDataRequest {
+  chartId: number;
+  chartType: ChartType;
+}
+
+@Component({
+  selector: 'app-report-editor',
+  imports: [FormsModule, ReportHelpDialog],
+  templateUrl: './report-editor.html',
+  styleUrl: './report-editor.scss',
+})
+export class ReportEditor {
+  readonly measurementOptions = measurementOptions;
+  readonly measurementUnit = measurementUnit;
+
+  setMetricUnits(metric: boolean): void {
+    this.reportFacade.setMetricUnits(metric);
+  }
+
+  measurementNote(measurement: SeriesInput['measurement']): string {
+    if (measurement === 'weather_code')
+      return 'WMO codes identify weather categories. Use daily values or count matching days; sums and averages of codes have no weather meaning.';
+    if (measurement === 'wind_direction_10m_dominant')
+      return 'Direction is measured clockwise from north. Ordinary sums and averages do not account for the 360°/0° wraparound; use daily values or counts.';
+    return '';
+  }
+
+  private readonly reportFacade = inject(ReportFacade);
+  private readonly dialogs = inject(DialogService);
+
+  readonly report = input.required<ReportInput>();
+
+  readonly autopopulate = model(false);
+
+  readonly editorMessage = output<string>();
+
+  readonly locationSearchRequested = output<SeriesRequest>();
+
+  readonly weatherDataRequested = output<ChartDataRequest>();
+
+  readonly startOverRequested = output<void>();
+  readonly anyFormExpanded = computed(() =>
+    this.report().charts.some((chart) => chart.seriesInputs.some((series) => series.expanded)),
+  );
+
+  toggleAllForms(): void {
+    this.reportFacade.setAllSeriesExpanded(!this.anyFormExpanded());
+  }
+
+  moveChart(chartId: number, direction: -1 | 1): void {
+    this.reportFacade.moveChart(chartId, direction);
+  }
+
+  activeHelp: HelpTopic | null = null;
+  helpSeries: SeriesInput | null = null;
+
+  setChartName(chartId: number, name: string): void {
+    this.reportFacade.setChartName(chartId, name);
+  }
+
+  setChartComments(chartId: number, comments: string): void {
+    this.reportFacade.setChartComments(chartId, comments);
+  }
+
+  pendingChartType(chartId: number): ChartType {
+    return (
+      this.report().charts.find((chart) => chart.chartId === chartId)?.pendingChartType ?? 'line'
+    );
+  }
+
+  setBarEnabled(chartId: number, enabled: boolean): void {
+    this.reportFacade.setPendingChartType(chartId, enabled ? 'bar' : 'line');
+  }
+
+  addChart(): void {
+    this.reportFacade.addChart();
+  }
+
+  async deleteInputChart(chartId: number): Promise<void> {
+    const chartIndex = this.report().charts.findIndex((chart) => chart.chartId === chartId);
+
+    if (chartIndex < 0) {
+      return;
+    }
+
+    const chart = this.report().charts[chartIndex];
+    const chartName = chart.name.trim() || `Chart ${chartIndex + 1}`;
+    const shouldDelete = await this.dialogs.confirm({
+      title: 'Delete chart?',
+      message: `Are you sure you want to delete this chart: ${chartName}?`,
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      confirmDanger: true,
+    });
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    const deleted = this.reportFacade.deleteChart(chartId);
+
+    this.editorMessage.emit(deleted ? '' : 'A story must contain at least one chart');
+  }
+
+  addSeries(chartId: number, sourceSeriesId: number): void {
+    this.reportFacade.addSeries(chartId, sourceSeriesId, this.autopopulate());
+  }
+
+  setChartWideEdit(chartId: number, enabled: boolean): void {
+    this.reportFacade.setChartWideEdit(chartId, enabled);
+  }
+
+  setSeriesTitle(chartId: number, seriesId: number, title: string): void {
+    this.reportFacade.setSeriesTitle(chartId, seriesId, title);
+  }
+
+  setSeriesField<K extends SharedSeriesField>(
+    chartId: number,
+    seriesId: number,
+    field: K,
+    value: SeriesInput[K],
+  ): void {
+    this.reportFacade.setSharedSeriesField(chartId, seriesId, field, value);
+  }
+
+  setDateFilterField<K extends DateFilterField>(
+    chartId: number,
+    seriesId: number,
+    field: K,
+    value: SeriesInput['dateFilter'][K],
+  ): void {
+    this.reportFacade.setDateFilterField(chartId, seriesId, field, value);
+  }
+
+  deleteSeries(chartId: number, seriesId: number): void {
+    const deleted = this.reportFacade.deleteSeries(chartId, seriesId);
+
+    this.editorMessage.emit(deleted ? '' : "Can't delete a chart's last series");
+  }
+
+  setGroupBy(chartId: number, groupBy: GroupBy | null): void {
+    this.reportFacade.setGroupBy(chartId, groupBy);
+  }
+
+  setSeriesExpanded(chartId: number, seriesId: number, event: Event): void {
+    const details = event.currentTarget as HTMLDetailsElement;
+
+    this.reportFacade.setSeriesExpanded(chartId, seriesId, details.open);
+  }
+
+  searchCity(chartId: number, series: SeriesInput): void {
+    this.locationSearchRequested.emit({
+      chartId,
+      series,
+    });
+  }
+
+  selectLocation(chartId: number, seriesId: number, location: QueryLocation): void {
+    this.reportFacade.selectLocation(chartId, seriesId, location);
+  }
+
+  getWeatherData(chartId: number): void {
+    this.weatherDataRequested.emit({
+      chartId,
+      chartType: this.pendingChartType(chartId),
+    });
+  }
+
+  showHelp(topic: HelpTopic, series: SeriesInput): void {
+    this.helpSeries = series;
+
+    this.activeHelp = this.activeHelp === topic ? null : topic;
+  }
+
+  closeHelp(): void {
+    this.activeHelp = null;
+    this.helpSeries = null;
+  }
+}

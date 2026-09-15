@@ -1,0 +1,168 @@
+<header class="app-header">
+  <div class="header-main">
+    <a class="brand" routerLink="/" aria-label="WeatherMeThis home">
+      <img class="brand-logo" src="/weathermethis-logo-navy.png" alt="WeatherMeThis" />
+    </a>
+
+    @if (!galleryActive()) {
+      <div class="chart-toolbar" [class.mobile-before-data]="!hasDisplayedChart()">
+        <div class="chart-name-control">
+          <label for="report-name">
+            Loaded story:
+            <strong
+              class="loaded-story-name"
+              [title]="loadedStoryName() ?? 'no story currently loaded'"
+            >
+              {{ loadedStoryName() ?? 'no story currently loaded' }}
+            </strong>
+          </label>
+          <input
+            id="report-name"
+            name="reportName"
+            type="text"
+            maxlength="60"
+            autocomplete="off"
+            placeholder="Story name- required for saving or sharing"
+            [ngModel]="report().name"
+            (ngModelChange)="setReportName($event)"
+          />
+        </div>
+      </div>
+    }
+    <div class="header-controls">
+      <nav class="site-navigation" aria-label="Primary navigation">
+        @if (galleryActive()) {
+          <a routerLink="/"> Story Editor </a>
+        } @else {
+          <a routerLink="/gallery"> Public Gallery </a>
+          <a href="https://weathermethis.com/gallery/6aa5daa864d7278aa1abb785"> Tutorial </a>
+        }
+      </nav>
+      @if (!galleryActive() && (auth.isAuthenticated$ | async)) {
+        <details
+          class="story-menu"
+          #storyMenu
+          (keydown.escape)="storyMenu.open = false; storyMenuSummary.focus()"
+        >
+          <summary #storyMenuSummary>My Stories</summary>
+          <div class="chart-actions" aria-label="Chart actions">
+            <button
+              type="button"
+              class="app-button app-button--primary"
+              (click)="storyMenu.open = false; saveReport()"
+            >
+              Save Story
+            </button>
+
+            <button
+              type="button"
+              class="app-button app-button--secondary"
+              [disabled]="!reportId()"
+              (click)="storyMenu.open = false; updateReport()"
+            >
+              Save Changes
+            </button>
+
+            <button
+              type="button"
+              class="app-button app-button--secondary"
+              (click)="storyMenu.open = false; getSavedReports()"
+            >
+              My Saved Stories
+            </button>
+
+            <button
+              type="button"
+              class="app-button app-button--secondary"
+              [disabled]="!reportId()"
+              (click)="storyMenu.open = false; toggleSelectedReportPublication()"
+            >
+              {{ selectedReportIsPublic() ? 'Remove from Gallery' : 'Make Public' }}
+            </button>
+
+            @if (reportId() && selectedReportIsPublic()) {
+              <button
+                type="button"
+                class="app-button app-button--secondary"
+                (click)="storyMenu.open = false; copySelectedReportLink()"
+              >
+                Share Link
+              </button>
+            }
+
+            <button
+              type="button"
+              class="app-button app-button--danger"
+              [disabled]="!reportId()"
+              (click)="storyMenu.open = false; deleteReport()"
+            >
+              Delete Story
+            </button>
+          </div>
+        </details>
+      }
+      <div class="account-area">
+        @if (auth.isLoading$ | async) {
+          <p class="login-status">Checking login...</p>
+        } @else {
+          @if ((auth.isAuthenticated$ | async) && (auth.user$ | async); as user) {
+            <app-account-menu
+              [email]="user.email ?? ''"
+              [authName]="user.name ?? user.nickname ?? ''"
+              (message)="showMessage($event)"
+            />
+          } @else {
+            @if (auth.error$ | async; as error) {
+              <p class="login-error">
+                {{ error.message }}
+              </p>
+            }
+
+            <div class="account-actions">
+              <button type="button" class="app-button app-button--secondary" (click)="login()">
+                Log in
+              </button>
+
+              <button type="button" class="app-button app-button--primary" (click)="signUp()">
+                Sign up
+              </button>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="app-content">
+  @if (statusMessage) {
+    <p class="status-message" role="status">
+      {{ statusMessage }}
+    </p>
+  }
+
+  @if (galleryActive()) {
+    <router-outlet />
+  } @else {
+    <app-saved-report-list
+      [reports]="savedReports()"
+      (closed)="closeSavedReports()"
+      (reportSelected)="selectReport($event)"
+      (publishRequested)="publishReport($event)"
+      (unpublishRequested)="unpublishReport($event)"
+    />
+
+    <app-report-editor
+      [report]="report()"
+      (startOverRequested)="startOver()"
+      [(autopopulate)]="autopopulate"
+      (editorMessage)="showMessage($event)"
+      (locationSearchRequested)="searchCity($event.chartId, $event.series)"
+      (weatherDataRequested)="getWeatherData($event.chartId, $event.chartType)"
+    />
+
+    <app-report-charts [charts]="report().charts" />
+  }
+</main>
+
+<app-message-dialog />

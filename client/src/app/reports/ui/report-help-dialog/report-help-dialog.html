@@ -1,0 +1,105 @@
+@if (topic()) {
+  <div class="help-backdrop" (click)="closed.emit()">
+    <div
+      class="help-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="help-title"
+      (click)="$event.stopPropagation()"
+    >
+      @switch (topic()) {
+        @case ('groupBy') {
+          <h3 id="help-title">Group dates by</h3>
+
+          <p>Group By determines how dates are combined into points on the chart.</p>
+
+          <p>
+            For example, grouping by year produces one result for each year, while grouping by month
+            and year produces one result for each individual month.
+          </p>
+        }
+
+        @case ('aggregation') {
+          <h3 id="help-title">Aggregation</h3>
+
+          <p>Aggregation determines how the weather values within each date group are combined.</p>
+
+          @switch (series()?.aggregation) {
+            @case ('rawValues') {
+              <p>Raw Values shows each daily value without combining multiple days.</p>
+            }
+
+            @case ('count') {
+              <p>Count returns the number of values that meet the selected comparison.</p>
+            }
+
+            @case ('sum') {
+              <p>Sum adds all qualifying values within the date group.</p>
+            }
+
+            @case ('min') {
+              <p>Minimum returns the lowest qualifying value within the date group.</p>
+            }
+
+            @case ('max') {
+              <p>Maximum returns the highest qualifying value within the date group.</p>
+            }
+
+            @case ('avgSum') {
+              <p>
+                Average Amount calculates an average based on summed values over the selected
+                frequency.
+              </p>
+            }
+
+            @case ('avgCnt') {
+              <p>
+                Average Count calculates the average number of qualifying values over the selected
+                frequency.
+              </p>
+            }
+
+            @default {
+              <p>Choose an aggregation to see more information about it.</p>
+            }
+          }
+        }
+
+        @case ('comparison') {
+          <h3 id="help-title">Comparison</h3>
+
+          <p>Comparison determines which weather values qualify for the analysis.</p>
+
+          <p>
+            For example, selecting greater than or equal to 90 with High Temperature finds days
+            where the high temperature was at least 90 degrees.
+          </p>
+
+          <p>Select None when you do not want to restrict values by a threshold.</p>
+        }
+
+        @case ('dateFilter') {
+          <h3 id="help-title">Filter date</h3>
+
+          <p>
+            Date Filter restricts the analysis to particular portions of the selected date range.
+          </p>
+
+          <p>
+            For example, you could analyze only June through August across many years, or only dates
+            from November through February.
+          </p>
+
+          <p>
+            This differs from Start Date and End Date, which determine the overall period of the
+            analysis.
+          </p>
+        }
+      }
+
+      <button type="button" class="app-button app-button--secondary" (click)="closed.emit()">
+        Close
+      </button>
+    </div>
+  </div>
+}

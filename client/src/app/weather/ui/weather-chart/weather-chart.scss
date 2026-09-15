@@ -1,0 +1,59 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+// The plot gets its own height. Legend entries below cannot reduce it.
+.chart-container.mobile-chart {
+  height: clamp(18rem, 78vh, 48rem);
+  height: clamp(18rem, 78svh, 48rem);
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.75rem;
+  list-style: none;
+  margin: 0.5rem 0 1rem;
+  padding: 0;
+}
+.chart-legend li {
+  min-width: 0;
+  max-width: 100%;
+}
+.chart-legend button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 0.3rem;
+  border: 0;
+  background: transparent;
+  color: #334155;
+  font: inherit;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.legend-color {
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+.series-hidden {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+.chart-legend button:focus-visible {
+  outline: 2px solid #0b64d0;
+  outline-offset: 2px;
+}

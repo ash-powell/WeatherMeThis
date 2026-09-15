@@ -1,0 +1,135 @@
+<div class="account-menu">
+  <button
+    type="button"
+    class="profile-button"
+    aria-label="Open account menu"
+    aria-haspopup="menu"
+    [attr.aria-expanded]="menuOpen()"
+    (click)="toggleMenu($event)"
+  >
+    {{ initials() }}
+  </button>
+
+  @if (menuOpen()) {
+    <div class="profile-menu" role="menu" (click)="$event.stopPropagation()">
+      <div class="account-summary">
+        <strong>{{ displayName() }}</strong>
+
+        @if (email()) {
+          <span>{{ email() }}</span>
+        }
+      </div>
+
+      <button type="button" role="menuitem" (click)="openEditDialog($event)">
+        Change display name
+      </button>
+
+      <button type="button" role="menuitem" (click)="logout()">Log out</button>
+
+      <button
+        type="button"
+        class="danger-menu-item"
+        role="menuitem"
+        (click)="openDeleteDialog($event)"
+      >
+        Delete membership
+      </button>
+    </div>
+  }
+</div>
+
+@if (editDialogOpen()) {
+  <div class="dialog-backdrop" (click)="closeEditDialog()">
+    <section
+      class="account-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edit-profile-title"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="edit-profile-title">Change display name</h2>
+
+      <label for="display-name"> Display name </label>
+
+      <input
+        id="display-name"
+        name="displayName"
+        type="text"
+        maxlength="100"
+        autocomplete="name"
+        [(ngModel)]="displayNameDraft"
+        (keydown.enter)="saveDisplayName()"
+      />
+
+      <div class="dialog-actions">
+        <button
+          type="button"
+          class="secondary-button"
+          [disabled]="busy()"
+          (click)="closeEditDialog()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="primary-button"
+          [disabled]="busy()"
+          (click)="saveDisplayName()"
+        >
+          {{ busy() ? 'Saving…' : 'Save' }}
+        </button>
+      </div>
+    </section>
+  </div>
+}
+
+@if (deleteDialogOpen()) {
+  <div class="dialog-backdrop" (click)="closeDeleteDialog()">
+    <section
+      class="account-dialog"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="delete-membership-title"
+      aria-describedby="delete-membership-description"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="delete-membership-title">Delete membership</h2>
+
+      <p id="delete-membership-description">
+        This permanently deletes your WeatherMeThis membership and every story you have saved. This
+        cannot be undone.
+      </p>
+
+      <label for="delete-confirmation"> Type <strong>DELETE</strong> to confirm </label>
+
+      <input
+        id="delete-confirmation"
+        name="deleteConfirmation"
+        type="text"
+        autocomplete="off"
+        [(ngModel)]="deleteConfirmation"
+      />
+
+      <div class="dialog-actions">
+        <button
+          type="button"
+          class="secondary-button"
+          [disabled]="busy()"
+          (click)="closeDeleteDialog()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="danger-button"
+          [disabled]="busy() || deleteConfirmation !== 'DELETE'"
+          (click)="deleteMembership()"
+        >
+          {{ busy() ? 'Deleting…' : 'Delete membership' }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

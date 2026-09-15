@@ -1,0 +1,45 @@
+<section class="public-report-page">
+  <a class="back-link" routerLink="/gallery"> ← Back to gallery </a>
+
+  @if (message()) {
+    <p class="page-message" role="status">
+      {{ message() }}
+    </p>
+  }
+
+  @if (loading()) {
+    <p class="loading-message">Loading story and weather data…</p>
+  } @else if (report(); as publicReport) {
+    <header class="report-heading">
+      <div>
+        <p class="eyebrow">Public weather story</p>
+        <h1>{{ publicReport.name }}</h1>
+        <p>
+          By {{ publicReport.authorDisplayName }} · Published
+          {{ publicReport.publishedAt | date: 'mediumDate' }}
+        </p>
+      </div>
+
+      <div class="report-actions">
+        <button
+          type="button"
+          class="like-button"
+          [class.liked]="publicReport.likedByCurrentUser"
+          [attr.aria-pressed]="publicReport.likedByCurrentUser"
+          [disabled]="liking()"
+          (click)="toggleLike()"
+        >
+          <span aria-hidden="true">♥</span>
+          {{ publicReport.likeCount }}
+          {{ publicReport.likeCount === 1 ? 'like' : 'likes' }}
+        </button>
+
+        <button type="button" class="share-button" (click)="copyLink()">Share link</button>
+
+        <button type="button" class="editor-button" (click)="openInEditor()">Open in Editor</button>
+      </div>
+    </header>
+
+    <app-report-charts [charts]="charts()" [collapsibleComments]="true" />
+  }
+</section>

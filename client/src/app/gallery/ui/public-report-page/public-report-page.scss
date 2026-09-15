@@ -1,0 +1,116 @@
+:host {
+  display: block;
+}
+
+.public-report-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.back-link {
+  justify-self: start;
+  color: #002d7a;
+  font-weight: 700;
+}
+
+.report-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+
+  color: white;
+  background: linear-gradient(135deg, #002d7a, #0b64d0);
+  border-radius: 0.75rem;
+}
+
+.report-heading h1,
+.report-heading p {
+  margin: 0;
+}
+
+.report-heading h1 {
+  margin-block: 0.2rem 0.35rem;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+}
+
+.eyebrow {
+  color: #bfdbfe;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.report-actions button {
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+
+  border: 1px solid rgb(255 255 255 / 65%);
+  border-radius: 0.35rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.like-button,
+.share-button,
+.editor-button {
+  color: #002d7a;
+  background: white;
+}
+
+.like-button.liked {
+  color: #b42318;
+  background: #fef3f2;
+}
+
+.page-message,
+.loading-message {
+  margin: 0;
+  padding: 0.75rem;
+
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+}
+
+.page-message {
+  color: #475569;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid #2aa5fc;
+  outline-offset: 2px;
+}
+
+@media (max-width: 42rem) {
+  .report-heading {
+    display: grid;
+  }
+
+  .report-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-content: stretch;
+  }
+
+  .report-actions button {
+    min-height: 2.75rem;
+    font-size: 1rem;
+  }
+}

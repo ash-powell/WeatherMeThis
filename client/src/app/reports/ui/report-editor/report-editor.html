@@ -1,0 +1,534 @@
+<section class="series-list" aria-label="Chart series">
+  <!----------------------- Iterate over charts to build forms  --------------->
+  @for (chart of report().charts; track chart.chartId; let chartIndex = $index) {
+    <section class="chart-editor">
+      <div class="chart-editor-heading">
+        <div
+          class="chart-position mobile-hide-until-chart"
+          [class.mobile-before-data]="chart.graphSeries.length === 0"
+        >
+          <div class="chart-order-buttons">
+            <button
+              type="button"
+              class="app-button app-button--secondary"
+              [disabled]="chartIndex === 0"
+              [attr.aria-label]="'Move chart ' + (chartIndex + 1) + ' up'"
+              (click)="moveChart(chart.chartId, -1)"
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              class="app-button app-button--secondary"
+              [disabled]="chartIndex === report().charts.length - 1"
+              [attr.aria-label]="'Move chart ' + (chartIndex + 1) + ' down'"
+              (click)="moveChart(chart.chartId, 1)"
+            >
+              ↓
+            </button>
+          </div>
+          <h2>Chart {{ chartIndex + 1 }}</h2>
+        </div>
+
+        <div
+          class="chart-name-field mobile-hide-until-chart"
+          [class.mobile-before-data]="chart.graphSeries.length === 0"
+        >
+          <input
+            type="text"
+            maxlength="100"
+            placeholder="Optional Chart Name"
+            aria-label="Optional Chart Name"
+            [name]="'chartName-' + chart.chartId"
+            [ngModel]="chart.name"
+            (ngModelChange)="setChartName(chart.chartId, $event)"
+          />
+        </div>
+
+        <button
+          type="button"
+          class="app-button app-button--danger mobile-hide-until-chart"
+          [class.mobile-before-data]="chart.graphSeries.length === 0"
+          (click)="deleteInputChart(chart.chartId)"
+        >
+          Delete Chart
+        </button>
+        <button
+          type="button"
+          class="app-button app-button--warning mobile-hide-until-chart"
+          [class.mobile-before-data]="chart.graphSeries.length === 0"
+          (click)="startOverRequested.emit()"
+        >
+          Start Over
+        </button>
+
+        <label class="chart-comments-control">
+          Comments
+
+          <textarea
+            maxlength="10000"
+            [name]="'chartComments-' + chart.chartId"
+            [ngModel]="chart.comments"
+            (ngModelChange)="setChartComments(chart.chartId, $event)"
+            placeholder="Add comments about this chart"
+          ></textarea>
+        </label>
+      </div>
+
+      <!----------------- Iterate over each series building forms  --------------- -->
+      @for (series of chart.seriesInputs; track series.seriesId) {
+        <details
+          class="series-details"
+          [open]="series.expanded"
+          (toggle)="setSeriesExpanded(chart.chartId, series.seriesId, $event)"
+        >
+          <summary class="series-summary">
+            <span>
+              Series {{ $index + 1 }}
+
+              @if (series.city) {
+                — {{ series.city }}
+              }
+            </span>
+          </summary>
+
+          <div class="series-settings">
+            <section class="form-section">
+              <h3>Location</h3>
+
+              <div class="form-grid">
+                <div class="form-field form-field--wide">
+                  <label [for]="'location-search-' + series.seriesId"> City or airport </label>
+
+                  <div class="input-button-group">
+                    <input
+                      [id]="'location-search-' + series.seriesId"
+                      [name]="'locationSearch-' + series.seriesId"
+                      type="text"
+                      placeholder="Enter city or airport to find coordinates"
+                      [(ngModel)]="series.locationSearch"
+                      (keydown.enter)="searchCity(chart.chartId, series)"
+                    />
+
+                    <button
+                      type="button"
+                      class="app-button app-button--secondary mandatory-button"
+                      (click)="searchCity(chart.chartId, series)"
+                    >
+                      Find Coordinates
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label [for]="'latitude-' + series.seriesId"> Latitude </label>
+
+                  <input
+                    [id]="'latitude-' + series.seriesId"
+                    [name]="'latitude-' + series.seriesId"
+                    placeholder="coordinates autofill"
+                    type="number"
+                    [(ngModel)]="series.latitude"
+                  />
+                </div>
+
+                <div class="form-field">
+                  <label [for]="'longitude-' + series.seriesId"> Longitude </label>
+
+                  <input
+                    [id]="'longitude-' + series.seriesId"
+                    [name]="'longitude-' + series.seriesId"
+                    placeholder="coordinates autofill"
+                    type="number"
+                    [(ngModel)]="series.longitude"
+                  />
+                </div>
+              </div>
+
+              @if (series.city && series.country) {
+                <p class="selected-location">
+                  Selected city:
+                  <strong>
+                    {{ series.city }},
+                    @if (series.admin1) {
+                      {{ series.admin1 }},
+                    }
+                    {{ series.country }}
+                  </strong>
+                </p>
+              }
+
+              @if (series.locations.length > 0) {
+                <ul class="location-results">
+                  @for (location of series.locations; track location.id) {
+                    <li>
+                      <button
+                        type="button"
+                        class="location-result-button"
+                        (click)="selectLocation(chart.chartId, series.seriesId, location)"
+                      >
+                        {{ location.name }},
+                        @if (location.admin1) {
+                          {{ location.admin1 }},
+                        }
+                        {{ location.country }}
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            </section>
+
+            <section class="form-section">
+              <h3>Date range</h3>
+
+              <div class="form-grid">
+                <div class="form-field">
+                  <label [for]="'start-date-' + series.seriesId"> Start date </label>
+
+                  <input
+                    [id]="'start-date-' + series.seriesId"
+                    [name]="'startDate-' + series.seriesId"
+                    type="date"
+                    [ngModel]="series.startDate"
+                    (ngModelChange)="
+                      setSeriesField(chart.chartId, series.seriesId, 'startDate', $event)
+                    "
+                  />
+                </div>
+
+                <div class="form-field">
+                  <label [for]="'end-date-' + series.seriesId"> End date </label>
+
+                  <input
+                    [id]="'end-date-' + series.seriesId"
+                    [name]="'endDate-' + series.seriesId"
+                    type="date"
+                    [ngModel]="series.endDate"
+                    (ngModelChange)="
+                      setSeriesField(chart.chartId, series.seriesId, 'endDate', $event)
+                    "
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section class="form-section">
+              <h3>Date filter</h3>
+
+              <div class="form-grid">
+                <div class="form-field">
+                  <label [for]="'date-filter-' + series.seriesId"> Filter dates by </label>
+
+                  <select
+                    [id]="'date-filter-' + series.seriesId"
+                    [name]="'dateFilter-' + series.seriesId"
+                    [ngModel]="series.dateFilter.unit"
+                    (ngModelChange)="
+                      setDateFilterField(chart.chartId, series.seriesId, 'unit', $event)
+                    "
+                  >
+                    <option value="none">optional</option>
+                    <option value="day">Day</option>
+                    <option value="monthDay">Month and day</option>
+                    <option value="month">Month</option>
+                    <option value="yearMonth">Year and month</option>
+                    <option value="year">Year</option>
+                  </select>
+                </div>
+
+                @if (series.dateFilter.unit !== 'none') {
+                  <div class="form-field">
+                    <label [for]="'date-filter-min-' + series.seriesId"> From </label>
+
+                    <input
+                      [id]="'date-filter-min-' + series.seriesId"
+                      [name]="'dateFilterMin-' + series.seriesId"
+                      type="text"
+                      [ngModel]="series.dateFilter.min"
+                      (ngModelChange)="
+                        setDateFilterField(chart.chartId, series.seriesId, 'min', $event)
+                      "
+                    />
+                  </div>
+
+                  <div class="form-field">
+                    <label [for]="'date-filter-max-' + series.seriesId"> Through </label>
+
+                    <input
+                      [id]="'date-filter-max-' + series.seriesId"
+                      [name]="'dateFilterMax-' + series.seriesId"
+                      type="text"
+                      [ngModel]="series.dateFilter.max"
+                      (ngModelChange)="
+                        setDateFilterField(chart.chartId, series.seriesId, 'max', $event)
+                      "
+                    />
+                  </div>
+                }
+              </div>
+            </section>
+
+            <section class="form-section">
+              <div class="section-heading">
+                <h3>Analysis</h3>
+
+                <button
+                  type="button"
+                  class="info-button"
+                  aria-label="Explain aggregation"
+                  (click)="showHelp('aggregation', series)"
+                >
+                  ⓘ
+                </button>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-field">
+                  <label [for]="'aggregation-' + series.seriesId"> "Chart the..." </label>
+
+                  <select
+                    [id]="'aggregation-' + series.seriesId"
+                    [name]="'aggregation-' + series.seriesId"
+                    [ngModel]="series.aggregation"
+                    (ngModelChange)="
+                      setSeriesField(chart.chartId, series.seriesId, 'aggregation', $event)
+                    "
+                  >
+                    <option [ngValue]="null" disabled>Select aggregation</option>
+                    <option value="rawValues">Actual non-aggregated values</option>
+                    <option value="count">Number of days</option>
+                    <option value="sum">Sum</option>
+                    <option value="max">Maximum</option>
+                    <option value="min">Minimum</option>
+                    <option value="avgCnt">Average number of days</option>
+                    <option value="avgSum">Average amount</option>
+                  </select>
+                </div>
+
+                @if (series.aggregation === 'avgCnt' || series.aggregation === 'avgSum') {
+                  <div class="form-field">
+                    <label [for]="'average-frequency-' + series.seriesId">
+                      Average frequency
+                    </label>
+
+                    <select
+                      [id]="'average-frequency-' + series.seriesId"
+                      [name]="'avgFrequency-' + series.seriesId"
+                      [ngModel]="series.avgFrequency"
+                      (ngModelChange)="
+                        setSeriesField(chart.chartId, series.seriesId, 'avgFrequency', $event)
+                      "
+                    >
+                      <option value="none">Select frequency</option>
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                }
+
+                <div class="form-field">
+                  <label [for]="'measurement-' + series.seriesId">
+                    "of the recorded values of..."
+                  </label>
+
+                  <select
+                    [id]="'measurement-' + series.seriesId"
+                    [name]="'measurement-' + series.seriesId"
+                    [ngModel]="series.measurement"
+                    (ngModelChange)="
+                      setSeriesField(chart.chartId, series.seriesId, 'measurement', $event)
+                    "
+                  >
+                    <option [ngValue]="null" disabled>Select measurement</option>
+                    @for (option of measurementOptions; track option.value) {
+                      <option [value]="option.value">
+                        {{ option.label }} ({{ measurementUnit(option.value, chart.metricUnits) }})
+                      </option>
+                    }
+                  </select>
+                </div>
+
+                <div class="form-field">
+                  <label [for]="'group-by-' + series.seriesId">
+                    "calculated for each group of..."
+                  </label>
+
+                  <select
+                    [id]="'group-by-' + series.seriesId"
+                    [name]="'groupBy-' + series.seriesId"
+                    [ngModel]="chart.groupBy"
+                    (ngModelChange)="setGroupBy(chart.chartId, $event)"
+                  >
+                    <option [ngValue]="null" disabled>Select group-by</option>
+                    <option value="yearMonthDay">Single days (show every day)</option>
+                    <option value="day">Days of the month (30ish groups)</option>
+                    <option value="month">Months of the year (12 groups)</option>
+                    <option value="monthDay">Days of the months of the year</option>
+                    <option value="yearMonth">Each month of each year</option>
+                    <option value="year">Each year</option>
+                    <option value="all">Entire data set (1 group)</option>
+                  </select>
+                </div>
+              </div>
+
+              @if (measurementNote(series.measurement)) {
+                <p class="form-note">{{ measurementNote(series.measurement) }}</p>
+              }
+              @if (series.aggregation === 'rawValues') {
+                <p class="form-note">
+                  Non-aggregated values must be calculated for every individual day.
+                </p>
+              }
+            </section>
+
+            <section class="form-section">
+              <h3>Value filter</h3>
+
+              <div class="form-grid">
+                <div class="form-field">
+                  <label [for]="'comparison-' + series.seriesId"> Only include values </label>
+
+                  <select
+                    [id]="'comparison-' + series.seriesId"
+                    [name]="'comparison-' + series.seriesId"
+                    [ngModel]="series.comparison"
+                    (ngModelChange)="
+                      setSeriesField(chart.chartId, series.seriesId, 'comparison', $event)
+                    "
+                  >
+                    <option value="none">Without a threshold</option>
+                    <option value=">=">Greater than or equal to</option>
+                    <option value="<=">Less than or equal to</option>
+                    <option value="=">Equal to</option>
+                  </select>
+                </div>
+
+                @if (series.comparison !== 'none') {
+                  <div class="form-field">
+                    <label [for]="'threshold-' + series.seriesId"
+                      >Threshold
+                      @if (series.measurement) {
+                        ({{ measurementUnit(series.measurement, chart.metricUnits) }})
+                      }
+                    </label>
+
+                    <input
+                      [id]="'threshold-' + series.seriesId"
+                      [name]="'threshold-' + series.seriesId"
+                      type="number"
+                      step="any"
+                      [ngModel]="series.threshold"
+                      (ngModelChange)="
+                        setSeriesField(chart.chartId, series.seriesId, 'threshold', $event)
+                      "
+                    />
+                  </div>
+                }
+                <div class="form-field">
+                  <input
+                    type="text"
+                    class="series-title-input"
+                    [id]="'series-title-' + series.seriesId"
+                    [name]="'series-title-' + series.seriesId"
+                    placeholder="Series title(optional)"
+                    aria-label="Series title (optional)"
+                    maxlength="100"
+                    [ngModel]="series.title ?? ''"
+                    (ngModelChange)="setSeriesTitle(chart.chartId, series.seriesId, $event)"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <div class="series-actions">
+              <div class="get-data-bar-metric">
+                <button
+                  type="button"
+                  class="app-button app-button--primary"
+                  (click)="getWeatherData(chart.chartId)"
+                >
+                  Get Data
+                </button>
+                <label class="bar-control">
+                  <input
+                    type="checkbox"
+                    [name]="'bar-' + chart.chartId + '-' + series.seriesId"
+                    [ngModel]="pendingChartType(chart.chartId) === 'bar'"
+                    (ngModelChange)="setBarEnabled(chart.chartId, $event)"
+                  />
+                  Bar
+                </label>
+                <label class="metric-units-control">
+                  <input
+                    type="checkbox"
+                    [ngModel]="chart.metricUnits"
+                    (ngModelChange)="setMetricUnits($event)"
+                    [attr.aria-describedby]="'unit-note-' + series.seriesId"
+                  />
+                  Metric
+                </label>
+              </div>
+
+              <div id="add-series-plus-auto">
+                <button
+                  type="button"
+                  id="add-series-button"
+                  class="app-button app-button--secondary"
+                  (click)="addSeries(chart.chartId, series.seriesId)"
+                >
+                  Add Series
+                </button>
+
+                <label class="autopopulate-control">
+                  <input
+                    type="checkbox"
+                    [ngModel]="autopopulate()"
+                    (ngModelChange)="autopopulate.set($event)"
+                  />
+                  Autopopulate
+                </label>
+              </div>
+
+              <button
+                type="button"
+                class="app-button app-button--danger"
+                (click)="deleteSeries(chart.chartId, series.seriesId)"
+              >
+                Delete Series
+              </button>
+
+              <label class="chart-wide-edit-control">
+                <input
+                  type="checkbox"
+                  [ngModel]="chart.chartWideEdit"
+                  (ngModelChange)="setChartWideEdit(chart.chartId, $event)"
+                />
+                Chart-wide edit mode
+              </label>
+            </div>
+            <p class="form-note" [id]="'unit-note-' + series.seriesId">
+              Metric selects units for all forms. Thresholds use the selected units. Click Get Data
+              to refresh this chart.
+            </p>
+          </div>
+        </details>
+      }
+      <!------------------- End series iteration section -------------------->
+    </section>
+  }
+</section>
+<!------------------------- End chart iteration section --------------------->
+
+<div class="editor-actions">
+  <button type="button" class="app-button app-button--secondary" (click)="addChart()">
+    Add Chart
+  </button>
+  <button type="button" class="app-button app-button--secondary" (click)="toggleAllForms()">
+    {{ anyFormExpanded() ? 'Collapse All Forms' : 'Expand Forms' }}
+  </button>
+</div>
+
+<app-report-help-dialog [topic]="activeHelp" [series]="helpSeries" (closed)="closeHelp()" />

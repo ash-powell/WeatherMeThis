@@ -1,0 +1,143 @@
+<section class="gallery-page">
+  <header class="gallery-heading">
+    <div>
+      <p class="eyebrow">WeatherMeThis community</p>
+      <h1>Public Story Gallery</h1>
+      <p>Explore weather stories published by registered members.</p>
+    </div>
+  </header>
+
+  <form class="gallery-filters" (ngSubmit)="applyFilters()">
+    <label>
+      Story name
+      <input type="search" name="galleryName" placeholder="Search story names" [(ngModel)]="name" />
+    </label>
+
+    <label>
+      City
+      <input
+        type="search"
+        name="galleryCity"
+        placeholder="For example, Atlanta"
+        [(ngModel)]="city"
+      />
+    </label>
+
+    <label>
+      Measurement
+      <select name="galleryMeasurement" [(ngModel)]="measurement">
+        <option value="">All measurements</option>
+        @for (option of measurementOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Sort by
+      <select name="gallerySort" [(ngModel)]="sort">
+        <option value="newest">Recently added</option>
+        <option value="popular">Most popular</option>
+        <option value="oldest">Oldest first</option>
+      </select>
+    </label>
+
+    <div class="filter-actions">
+      <button type="submit" class="primary-button">Search</button>
+
+      <button type="button" class="secondary-button" (click)="clearFilters()">Clear</button>
+    </div>
+  </form>
+
+  @if (message()) {
+    <p class="gallery-message" role="alert">
+      {{ message() }}
+    </p>
+  }
+
+  @if (loading()) {
+    <p class="loading-message">Loading public stories…</p>
+  } @else if (response(); as result) {
+    <div class="result-summary">
+      {{ result.total }}
+      {{ result.total === 1 ? 'story' : 'stories' }}
+    </div>
+
+    @if (result.reports.length === 0) {
+      <section class="empty-gallery">
+        <h2>No matching stories</h2>
+        <p>Try removing one or more filters.</p>
+      </section>
+    } @else {
+      <div class="gallery-grid">
+        @for (report of result.reports; track report._id) {
+          <article class="gallery-card">
+            <div class="card-heading">
+              <div>
+                <h2>
+                  <a [routerLink]="['/gallery', report._id]">
+                    {{ report.name }}
+                  </a>
+                </h2>
+
+                <p>
+                  By {{ report.authorDisplayName }} ·
+                  {{ report.publishedAt | date: 'mediumDate' }}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                class="like-button"
+                [class.liked]="report.likedByCurrentUser"
+                [disabled]="likingReportId() === report._id"
+                [attr.aria-pressed]="report.likedByCurrentUser"
+                (click)="toggleLike(report)"
+              >
+                <span aria-hidden="true">♥</span>
+                {{ report.likeCount }}
+              </button>
+            </div>
+
+            <dl>
+              <div>
+                <dt>Cities</dt>
+                <dd>{{ report.cities.join(', ') }}</dd>
+              </div>
+              <div>
+                <dt>Measurements</dt>
+                <dd>
+                  @for (measurement of report.measurements; track measurement; let last = $last) {
+                    {{ measurementLabel(measurement) }}{{ last ? '' : ', ' }}
+                  }
+                </dd>
+              </div>
+              <div>
+                <dt>Charts</dt>
+                <dd>{{ report.chartCount }}</dd>
+              </div>
+            </dl>
+
+            <a class="open-report-link" [routerLink]="['/gallery', report._id]"> Open story </a>
+          </article>
+        }
+      </div>
+
+      <nav class="pagination" aria-label="Gallery pages">
+        <button type="button" [disabled]="result.page === 1" (click)="goToPage(result.page - 1)">
+          Previous
+        </button>
+
+        <span> Page {{ result.page }} of {{ result.totalPages }} </span>
+
+        <button
+          type="button"
+          [disabled]="result.page === result.totalPages"
+          (click)="goToPage(result.page + 1)"
+        >
+          Next
+        </button>
+      </nav>
+    }
+  }
+</section>

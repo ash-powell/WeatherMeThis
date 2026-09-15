@@ -1,0 +1,45 @@
+@if (dialogs.dialog(); as dialog) {
+  <div
+    class="dialog-backdrop"
+    [class.dialog-backdrop--auto-close]="dialog.autoCloseMs !== null"
+    [style.animation-duration.ms]="dialog.autoCloseMs"
+  >
+    <section
+      class="message-dialog"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="message-dialog-title"
+      aria-describedby="message-dialog-body"
+    >
+      <h2 id="message-dialog-title">{{ dialog.title }}</h2>
+      <p id="message-dialog-body">{{ dialog.message }}</p>
+
+      @if (dialog.confirmLabel || dialog.cancelLabel) {
+        <div class="dialog-actions">
+          @if (dialog.cancelLabel) {
+            <button
+              type="button"
+              class="dialog-button dialog-button--secondary"
+              (click)="dialogs.respond(false)"
+            >
+              {{ dialog.cancelLabel }}
+            </button>
+          }
+
+          @if (dialog.confirmLabel) {
+            <button
+              type="button"
+              class="dialog-button"
+              [class.dialog-button--primary]="!dialog.confirmDanger"
+              [class.dialog-button--danger]="dialog.confirmDanger"
+              autofocus
+              (click)="dialogs.respond(true)"
+            >
+              {{ dialog.confirmLabel }}
+            </button>
+          }
+        </div>
+      }
+    </section>
+  </div>
+}

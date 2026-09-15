@@ -1,0 +1,38 @@
+@if (reports().length > 0) {
+  <section class="saved-reports">
+    <div class="saved-list-heading">
+      <h2>Saved Stories</h2>
+      <button type="button" class="publication-button" (click)="closed.emit()">Close</button>
+    </div>
+
+    <ul class="saved-report-list">
+      @for (report of reports(); track report._id) {
+        <li>
+          <button type="button" class="saved-report-button" (click)="reportSelected.emit(report)">
+            {{ report.name }}
+          </button>
+
+          @if (report.isPublic) {
+            <a class="gallery-link" [routerLink]="['/gallery', report._id]"> View public story </a>
+
+            <button
+              type="button"
+              class="publication-button"
+              (click)="unpublishRequested.emit(report)"
+            >
+              Unpublish
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="publication-button"
+              (click)="publishRequested.emit(report)"
+            >
+              Publish
+            </button>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+}

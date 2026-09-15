@@ -1,0 +1,267 @@
+:host {
+  display: block;
+}
+
+.gallery-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.gallery-heading {
+  padding: clamp(1rem, 3vw, 2rem);
+
+  color: white;
+  background: linear-gradient(135deg, #002d7a, #0b64d0);
+  border-radius: 0.75rem;
+}
+
+.gallery-heading h1,
+.gallery-heading p {
+  margin: 0;
+}
+
+.gallery-heading h1 {
+  margin-block: 0.2rem 0.35rem;
+  font-size: clamp(1.6rem, 4vw, 2.5rem);
+}
+
+.eyebrow {
+  color: #bfdbfe;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gallery-filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding: 1rem;
+
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.65rem;
+}
+
+.gallery-filters label {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.gallery-filters input,
+.gallery-filters select {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.55rem;
+
+  box-sizing: border-box;
+  color: #1e293b;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.35rem;
+  font: inherit;
+  font-weight: 400;
+}
+
+.filter-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+button,
+.open-report-link {
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-button,
+.open-report-link {
+  color: white;
+  background: #002d7a;
+}
+
+.secondary-button,
+.pagination button {
+  color: #002d7a;
+  background: white;
+  border-color: #002d7a;
+}
+
+.gallery-message,
+.loading-message,
+.empty-gallery {
+  margin: 0;
+  padding: 1rem;
+
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+}
+
+.gallery-message {
+  color: #b42318;
+  background: #fef3f2;
+  border-color: #fecdca;
+}
+
+.result-summary {
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.gallery-card {
+  display: grid;
+  align-content: start;
+  gap: 0.8rem;
+  min-width: 0;
+  padding: 1rem;
+
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.65rem;
+  box-shadow: 0 2px 8px rgb(15 23 42 / 6%);
+}
+
+.card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.card-heading h2,
+.card-heading p {
+  margin: 0;
+}
+
+.card-heading h2 {
+  font-size: 1.05rem;
+}
+
+.card-heading h2 a {
+  color: #002d7a;
+}
+
+.card-heading p {
+  margin-top: 0.2rem;
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+.like-button {
+  flex: 0 0 auto;
+  min-width: 3.5rem;
+
+  color: #64748b;
+  background: white;
+  border-color: #cbd5e1;
+}
+
+.like-button.liked {
+  color: #b42318;
+  background: #fef3f2;
+  border-color: #fda29b;
+}
+
+.gallery-card dl {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.gallery-card dt {
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.gallery-card dd {
+  margin: 0.1rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.open-report-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  text-decoration: none;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #2aa5fc;
+  outline-offset: 2px;
+}
+
+@media (max-width: 64rem) {
+  .gallery-filters,
+  .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 42rem) {
+  .gallery-filters,
+  .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-filters input,
+  .gallery-filters select,
+  button,
+  .open-report-link {
+    min-height: 2.75rem;
+    font-size: 1rem;
+  }
+
+  .filter-actions,
+  .pagination {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .pagination {
+    text-align: center;
+  }
+
+  .open-report-link {
+    justify-self: stretch;
+  }
+}

@@ -1,0 +1,615 @@
+:host {
+  display: block;
+}
+
+.autopopulate-control,
+.chart-wide-edit-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+
+  min-height: 32px;
+
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.autopopulate-control input,
+.chart-wide-edit-control input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+}
+
+.chart-editor-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.chart-comments-control {
+  display: flex;
+  flex: 1 1 20rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+
+  min-width: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.chart-comments-control textarea {
+  width: clamp(12rem, 35vw, 35rem);
+  height: 60px;
+  min-height: 60px;
+  max-height: 60px;
+  padding: 0.3rem 0.45rem;
+  margin-bottom: 10px;
+
+  box-sizing: border-box;
+  overflow-y: auto;
+  resize: none;
+
+  color: #1e293b;
+  background-color: white;
+  font: inherit;
+  font-weight: 400;
+  line-height: 1.2;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 0.3rem;
+}
+
+.app-button {
+  min-width: 0;
+  min-height: 32px;
+  padding: 0.3rem 0.6rem;
+
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
+
+  cursor: pointer;
+  touch-action: manipulation;
+
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease,
+    transform 100ms ease;
+}
+
+.app-button--primary {
+  color: white;
+  background-color: #002d7a;
+}
+
+.app-button--secondary {
+  color: #002d7a;
+  background-color: whitesmoke;
+  border-color: #002d7a;
+}
+
+.app-button--danger {
+  color: white;
+  background-color: #b42318;
+}
+
+@media (hover: hover) {
+  .app-button--primary:hover {
+    background-color: #0b64d0;
+  }
+
+  .app-button--secondary:hover {
+    background-color: #eaf5ff;
+    border-color: #0b64d0;
+  }
+
+  .app-button--danger:hover {
+    background-color: #912018;
+  }
+
+  .location-result-button:hover {
+    background-color: #eaf5ff;
+  }
+}
+
+.app-button:active,
+.location-result-button:active {
+  transform: translateY(1px);
+}
+
+.app-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.series-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.series-details {
+  overflow: hidden;
+
+  background-color: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 6%);
+}
+
+.series-summary {
+  list-style: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+
+  min-height: 36px;
+  padding: 0.35rem 0.65rem;
+
+  color: #002d7a;
+  background-color: #f8fafc;
+
+  font-size: 0.85rem;
+  font-weight: 700;
+
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.series-summary::-webkit-details-marker {
+  display: none;
+}
+
+.series-summary::marker {
+  content: '';
+}
+
+.series-summary::after {
+  content: '';
+
+  flex: 0 0 auto;
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-right: 0.15rem;
+
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+
+  transform: rotate(45deg);
+  transition: transform 150ms ease;
+}
+
+.series-details[open] > .series-summary {
+  background-color: #eaf5ff;
+  border-bottom: 1px solid #dbe3eb;
+}
+
+.series-details[open] > .series-summary::after {
+  transform: rotate(225deg);
+}
+
+.series-settings {
+  padding: 0.45rem 0.65rem 0.6rem;
+}
+
+/* =========================================================
+   Form sections
+   ========================================================= */
+
+.form-section {
+  padding-block: 0.3rem;
+}
+
+.form-section + .form-section {
+  margin-top: 0.25rem;
+  padding-top: 0.45rem;
+
+  border-top: 1px solid #e2e8f0;
+}
+
+.form-section h3 {
+  margin: 0 0 0.3rem;
+
+  color: #002d7a;
+
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.4rem 0.6rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.form-field--wide {
+  grid-column: span 2;
+}
+
+.form-field label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.form-field input,
+.form-field select {
+  width: 100%;
+  min-width: 0;
+  min-height: 32px;
+  padding: 0.25rem 0.4rem;
+
+  font: inherit;
+  font-size: 0.8rem;
+
+  color: #1e293b;
+  background-color: white;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 0.3rem;
+}
+
+.form-field input[type='number'] {
+  max-width: 10rem;
+}
+
+.series-title-input {
+  margin-top: 0.5rem;
+}
+
+.input-button-group {
+  display: flex;
+  align-items: stretch;
+  gap: 0.3rem;
+}
+
+.input-button-group input {
+  flex: 1 1 auto;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.section-heading h3 {
+  margin: 0;
+}
+
+.info-button {
+  display: inline-grid;
+  place-items: center;
+
+  width: 28px;
+  height: 28px;
+  padding: 0;
+
+  color: #002d7a;
+  background-color: transparent;
+
+  border: 1px solid transparent;
+  border-radius: 50%;
+
+  font: inherit;
+  font-size: 1rem;
+
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .info-button:hover {
+    background-color: #dbeafe;
+  }
+}
+
+.selected-location,
+.form-note {
+  margin: 0.3rem 0 0;
+
+  color: #475569;
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+
+.series-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+
+  margin-top: 0.5rem;
+}
+
+#add-series-plus-auto {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid black;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  gap: 0.5rem;
+  padding: 4px;
+}
+
+#add-series-button {
+  margin: -1px 2px -1px -1px;
+}
+
+/* =========================================================
+   Location results
+   ========================================================= */
+
+.location-results {
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.location-results {
+  display: grid;
+  gap: 0.25rem;
+
+  margin-top: 0.35rem;
+}
+
+.location-result-button {
+  min-height: 32px;
+  padding: 0.3rem 0.55rem;
+
+  color: #002d7a;
+  background-color: white;
+
+  font: inherit;
+  font-size: 0.78rem;
+
+  border: 1px solid #0b64d0;
+  border-radius: 0.3rem;
+
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* =========================================================
+   Focus styles
+   ========================================================= */
+
+.app-button:focus-visible,
+.info-button:focus-visible,
+.form-field input:focus-visible,
+.form-field select:focus-visible,
+.location-result-button:focus-visible,
+.series-summary:focus-visible {
+  position: relative;
+  z-index: 1;
+
+  outline: 2px solid #2aa5fc;
+  outline-offset: 2px;
+}
+
+@media (max-width: 64rem) {
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 42rem) {
+  .chart-comments-control {
+    flex: 1 1 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+
+    width: 100%;
+  }
+
+  .chart-comments-control textarea {
+    width: 100%;
+    height: 4.5rem;
+    min-height: 4.5rem;
+    max-height: 4.5rem;
+  }
+}
+
+@media (max-width: 42rem) {
+  .mobile-hide-until-chart.mobile-before-data {
+    display: none;
+  }
+
+  .app-button {
+    width: 100%;
+    min-height: 44px;
+
+    padding: 0.55rem 0.7rem;
+    font-size: 0.95rem;
+  }
+
+  .autopopulate-control,
+  .chart-wide-edit-control {
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .series-list {
+    gap: 0.5rem;
+  }
+
+  .series-summary {
+    min-height: 48px;
+    padding: 0.6rem 0.75rem;
+
+    font-size: 0.95rem;
+  }
+
+  .series-settings {
+    padding: 0.6rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+
+  .form-field--wide {
+    grid-column: auto;
+  }
+
+  .form-field label {
+    font-size: 0.9rem;
+  }
+
+  .form-field input,
+  .form-field select {
+    min-height: 44px;
+    padding: 0.5rem 0.6rem;
+    font-size: 1rem;
+  }
+
+  .form-field input[type='number'] {
+    max-width: none;
+  }
+
+  .input-button-group {
+    flex-direction: column;
+  }
+
+  .location-result-button {
+    width: 100%;
+    min-height: 44px;
+
+    font-size: 0.95rem;
+    text-align: left;
+  }
+
+  .series-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (pointer: coarse) {
+  .app-button,
+  .location-result-button {
+    min-height: 44px;
+  }
+
+  .series-summary {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-button,
+  .series-summary::after {
+    transition: none;
+  }
+}
+
+.chart-position,
+.editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.editor-actions {
+  flex-wrap: wrap;
+}
+.chart-order-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.chart-order-buttons .app-button {
+  min-width: 2.5rem;
+  min-height: 2rem;
+  padding: 0.15rem 0.5rem;
+}
+.chart-name-field {
+  min-width: 0;
+}
+.chart-name-field input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 2.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #94a3b8;
+  border-radius: 0.3rem;
+  font: inherit;
+}
+.app-button--warning {
+  color: #854d0e;
+  background: #fef9c3;
+  border-color: #ca8a04;
+}
+.chart-name-field input:focus-visible {
+  outline: 3px solid #0b64d0;
+  outline-offset: 2px;
+}
+@media (pointer: coarse) {
+  .chart-order-buttons .app-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+.bar-control,
+.metric-units-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.get-data-bar-metric {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding: 4px;
+  border: 1px solid #002d7a;
+  border-radius: 0.5rem;
+  background: whitesmoke;
+  color: #002d7a;
+  overflow: hidden;
+}
+
+.mandatory-button {
+  background: whitesmoke;
+}
+
+.get-data-bar-metric .bar-control,
+.get-data-bar-metric .metric-units-control {
+  padding-inline: 0.25rem 0.5rem;
+}
+.get-data-bar-metric input {
+  accent-color: white;
+}
+
+@media (max-width: 42rem) {
+  .get-data-bar-metric {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .get-data-bar-metric .app-button {
+    min-width: 0;
+  }
+}
