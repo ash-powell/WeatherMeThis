@@ -1,8 +1,9 @@
-import { Component, signal, input } from '@angular/core';
+import { Component, inject, signal, input } from '@angular/core';
 
 import { WeatherChart } from '../../../weather/ui/weather-chart/weather-chart';
 
 import type { ChartInput } from '../../models/report-editor.models';
+import { ReportLayoutState } from '../../state/report-layout-state';
 
 @Component({
   selector: 'app-report-charts',
@@ -14,6 +15,17 @@ export class ReportCharts {
   readonly collapsibleComments = input(true);
   readonly expandedComments = signal<Set<ChartInput>>(new Set());
   readonly collapsedCharts = signal<Set<ChartInput>>(new Set());
+
+  private readonly reportLayoutState = inject(ReportLayoutState);
+  readonly showControlsToggle = input(false);
+
+  controlsHidden(chartId: number): boolean{
+    return this.reportLayoutState.controlsHidden(chartId);
+  }
+
+  toggleControls(chartId: number): void{
+    this.reportLayoutState.toggleControls(chartId);
+  }
 
   toggleComments(chart: ChartInput): void {
     this.expandedComments.update((current) => {

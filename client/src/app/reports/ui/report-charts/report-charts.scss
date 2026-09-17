@@ -2,6 +2,13 @@
   display: block;
 }
 
+.report-chart{
+  padding: 5px;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 6%);
+}
+
 .chart-heading {
   display: flex;
   align-items: center;
@@ -13,7 +20,15 @@
   margin-block: 0.83em;
 }
 
-.chart-collapse-toggle {
+.chart-heading-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chart-collapse-toggle,
+.chart-controls-toggle {
   min-height: 38px;
   padding: 0.4rem 0.65rem;
 
@@ -27,7 +42,8 @@
   cursor: pointer;
 }
 
-.chart-collapse-toggle:focus-visible {
+.chart-collapse-toggle:focus-visible,
+.chart-controls-toggle:focus-visible {
   outline: 2px solid #0b64d0;
   outline-offset: 2px;
 }
@@ -74,7 +90,8 @@
 }
 
 @media (max-width: 42rem) {
-  .chart-collapse-toggle {
+  .chart-collapse-toggle,
+  .chart-controls-toggle {
     min-height: 44px;
   }
 }

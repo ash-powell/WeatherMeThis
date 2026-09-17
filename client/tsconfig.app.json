@@ -7,7 +7,7 @@
   },
   "include": [
     "src/**/*.ts"
-  ],
+, "src/app/reports/state/report-layout-state"  ],
   "exclude": [
     "src/**/*.spec.ts"
   ]

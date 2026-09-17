@@ -37,7 +37,6 @@ import { MessageDialog } from './shared/ui/message-dialog/message-dialog';
     AsyncPipe,
     SavedReportList,
     ReportEditor,
-    ReportCharts,
     AccountMenu,
     RouterLink,
     RouterOutlet,

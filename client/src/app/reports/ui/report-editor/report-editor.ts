@@ -23,6 +23,8 @@ import type { GroupBy } from '../../../weather/models/analysis.models';
 
 import { ReportCharts } from '../report-charts/report-charts';
 
+import { ReportLayoutState } from '../../state/report-layout-state';
+
 export interface SeriesRequest {
   chartId: number;
   series: SeriesInput;
@@ -42,6 +44,12 @@ export interface ChartDataRequest {
 export class ReportEditor {
   readonly measurementOptions = measurementOptions;
   readonly measurementUnit = measurementUnit;
+
+  private readonly reportLayoutState = inject(ReportLayoutState);
+
+  controlsHidden(chartId: number): boolean {
+    return this.reportLayoutState.controlsHidden(chartId);
+  }
 
   setMetricUnits(metric: boolean): void {
     this.reportFacade.setMetricUnits(metric);

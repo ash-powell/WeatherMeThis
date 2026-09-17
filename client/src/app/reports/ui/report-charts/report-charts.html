@@ -6,15 +6,29 @@
           {{ chart.name || 'Chart ' + (chartIndex + 1) }}
         </h2>
 
-        <button
-          type="button"
-          class="chart-collapse-toggle"
-          [attr.aria-controls]="'report-chart-content-' + chart.chartId"
-          [attr.aria-expanded]="!collapsedCharts().has(chart)"
-          (click)="toggleChart(chart)"
-        >
-          {{ collapsedCharts().has(chart) ? 'Expand Chart' : 'Collapse Chart' }}
-        </button>
+        <div class="chart-heading-actions">
+          <button
+            type="button"
+            class="chart-collapse-toggle"
+            [attr.aria-controls]="'report-chart-content-' + chart.chartId"
+            [attr.aria-expanded]="!collapsedCharts().has(chart)"
+            (click)="toggleChart(chart)"
+          >
+            {{ collapsedCharts().has(chart) ? 'Show Chart' : 'Hide Chart' }}
+          </button>
+
+          @if (showControlsToggle()) {
+            <button
+              type="button"
+              class="chart-controls-toggle"
+              [attr.aria-controls]="'chart-controls-' + chart.chartId"
+              [attr.aria-expanded]="!controlsHidden(chart.chartId)"
+              (click)="toggleControls(chart.chartId)"
+            >
+              {{ controlsHidden(chart.chartId) ? 'Show Controls' : 'Hide Controls' }}
+            </button>
+          }
+        </div>
       </div>
 
       <div
