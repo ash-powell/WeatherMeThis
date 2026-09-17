@@ -54,6 +54,22 @@
           Delete Chart
         </button>
 
+        <button
+          type="button"
+          class="app-button app-button--secondary add-chart-button"
+          (click)="addChart(chart.chartId)"
+        >
+          Add Chart
+        </button>
+
+        <button
+          type="button"
+          class = "app-button app-button--secondary chart-forms-toggle"
+          (click) = "toggleChartForms(chart.chartId)"
+        >
+          {{ chartHasExpandedForms(chart.chartId) ? 'Collapse Forms' : 'Expand Forms' }}
+        </button>
+
         <label class="chart-comments-control">
           Comments
 
@@ -514,13 +530,5 @@
 </section>
 <!------------------------- End chart iteration section --------------------->
 
-<div class="editor-actions">
-  <button type="button" class="app-button app-button--secondary" (click)="addChart()">
-    Add Chart
-  </button>
-  <button type="button" class="app-button app-button--secondary" (click)="toggleAllForms()">
-    {{ anyFormExpanded() ? 'Collapse All Forms' : 'Expand Forms' }}
-  </button>
-</div>
 
 <app-report-help-dialog [topic]="activeHelp" [series]="helpSeries" (closed)="closeHelp()" />

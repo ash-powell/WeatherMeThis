@@ -111,12 +111,13 @@ export class ReportEditorStore {
     }));
   }
 
-  setAllSeriesExpanded(expanded: boolean): void {
-    this.report.update((report) => ({
-      ...report,
-      charts: report.charts.map((chart) => ({
-        ...chart,
-        seriesInputs: chart.seriesInputs.map((series) => ({ ...series, expanded })),
+  setChartSeriesExpanded(chartId: number, expanded: boolean): void {
+    this.updateChart(chartId, (chart) => ({
+      ...chart,
+
+      seriesInputs: chart.seriesInputs.map((series) => ({
+        ...series,
+        expanded,
       })),
     }));
   }
@@ -132,15 +133,30 @@ export class ReportEditorStore {
     });
   }
 
-  addChart(): void {
-    this.report.update((current) => ({
-      ...current,
+  addChart(afterChartId?: number): void {
+    this.report.update((current) => {
+      const sourceIndex =
+        afterChartId === undefined
+          ? current.charts.length - 1
+          : current.charts.findIndex(
+              (chart) => chart.chartId === afterChartId,
+            );
 
-      charts: [
-        ...current.charts,
-        { ...this.createChartInput(), metricUnits: current.charts[0]?.metricUnits === true },
-      ],
-    }));
+      if (sourceIndex < 0 && current.charts.length > 0) {return current;}
+
+      const sourceChart = current.charts[sourceIndex];
+
+      const newChart = {
+        ...this.createChartInput(),
+        metricUnits: sourceChart?.metricUnits ?? false,
+      };
+
+      const charts = [...current.charts];
+
+      charts.splice(sourceIndex + 1, 0, newChart);
+
+      return {...current, charts,};
+    });
   }
 
   addSeries(chartId: number, sourceSeriesId: number, autopopulate: boolean): void {

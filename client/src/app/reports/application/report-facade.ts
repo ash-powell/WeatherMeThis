@@ -243,16 +243,16 @@ export class ReportFacade {
     this.savedReportsState.set([]);
   }
 
-  setAllSeriesExpanded(expanded: boolean): void {
-    this.reportEditorStore.setAllSeriesExpanded(expanded);
+  setChartSeriesExpanded(chartId: number, expanded: boolean): void {
+    this.reportEditorStore.setChartSeriesExpanded(chartId, expanded);
   }
 
   moveChart(chartId: number, direction: -1 | 1): void {
     this.reportEditorStore.moveChart(chartId, direction);
   }
 
-  addChart(): void {
-    this.reportEditorStore.addChart();
+  addChart(afterChartId?: number): void {
+    this.reportEditorStore.addChart(afterChartId);
   }
 
   addSeries(chartId: number, sourceSeriesId: number, autopopulate: boolean): void {

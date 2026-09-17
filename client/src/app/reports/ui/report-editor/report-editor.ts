@@ -1,5 +1,5 @@
 import { measurementOptions, measurementUnit } from '../../../weather/models/measurement.models';
-import { Component, computed, inject, input, model, output } from '@angular/core';
+import { Component, inject, input, model, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { ReportFacade } from '../../application/report-facade';
@@ -66,12 +66,18 @@ export class ReportEditor {
 
   readonly weatherDataRequested = output<ChartDataRequest>();
 
-  readonly anyFormExpanded = computed(() =>
-    this.report().charts.some((chart) => chart.seriesInputs.some((series) => series.expanded)),
-  );
+  chartHasExpandedForms(chartId: number): boolean {
+    const chart = this.report().charts.find(
+      (currentChart) => currentChart.chartId === chartId,
+    );
 
-  toggleAllForms(): void {
-    this.reportFacade.setAllSeriesExpanded(!this.anyFormExpanded());
+    return chart?.seriesInputs.some((series) => series.expanded) ?? false;
+  }
+
+  toggleChartForms(chartId: number): void {
+    const expanded = !this.chartHasExpandedForms(chartId);
+
+    this.reportFacade.setChartSeriesExpanded(chartId, expanded);
   }
 
   moveChart(chartId: number, direction: -1 | 1): void {
@@ -99,8 +105,7 @@ export class ReportEditor {
     this.reportFacade.setPendingChartType(chartId, enabled ? 'bar' : 'line');
   }
 
-  addChart(): void {
-    this.reportFacade.addChart();
+  addChart(afterChartId: number): void {this.reportFacade.addChart(afterChartId);
   }
 
   async deleteInputChart(chartId: number): Promise<void> {
