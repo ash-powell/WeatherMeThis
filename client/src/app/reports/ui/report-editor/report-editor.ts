@@ -66,7 +66,6 @@ export class ReportEditor {
 
   readonly weatherDataRequested = output<ChartDataRequest>();
 
-  readonly startOverRequested = output<void>();
   readonly anyFormExpanded = computed(() =>
     this.report().charts.some((chart) => chart.seriesInputs.some((series) => series.expanded)),
   );

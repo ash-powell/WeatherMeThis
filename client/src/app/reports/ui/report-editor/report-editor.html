@@ -53,14 +53,6 @@
         >
           Delete Chart
         </button>
-        <button
-          type="button"
-          class="app-button app-button--warning mobile-hide-until-chart"
-          [class.mobile-before-data]="chart.graphSeries.length === 0"
-          (click)="startOverRequested.emit()"
-        >
-          Start Over
-        </button>
 
         <label class="chart-comments-control">
           Comments

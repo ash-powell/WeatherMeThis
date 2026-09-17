@@ -517,8 +517,8 @@ export class App implements OnInit {
     const shouldReset = await this.dialogs.confirm({
       title: 'Start over?',
       message:
-        'This will discard all current story settings and chart ' +
-        'data. Stories already saved to your account will not be deleted.',
+        'This will discard all current story settings and chart data.\n' +
+        'No saved stories will be deleted.',
       confirmLabel: 'Start Over',
       cancelLabel: 'Cancel',
     });

@@ -119,10 +119,26 @@
 
 /* Keep the primary navigation buttons aligned with Log in / Sign up. */
 .site-navigation a,
-.account-actions .app-button {
+.site-navigation .start-over-button,
+.account-actions .app-button{
   box-sizing: border-box;
   height: 44px;
   min-height: 44px;
+}
+
+.site-navigation .start-over-button {
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+
+  display: inline-grid;
+  place-items: center;
+
+  font-size: 1.75rem;
+  line-height: 1;
+
+  overflow: hidden;
+  flex: 0 0 44px;
 }
 
 .login-status,
