@@ -263,15 +263,29 @@ export class ReportEditorStore {
   }
 
   deleteChart(chartId: number): boolean {
-    if (this.report().charts.length === 1) {
+    const chartExists = this.report().charts.some(
+      (chart) => chart.chartId === chartId,
+    );
+
+    if (!chartExists) {
       return false;
     }
 
-    this.report.update((current) => ({
-      ...current,
+    this.report.update((current) => {
+      if (current.charts.length === 1) {
+        return {
+          ...current,
+          charts: [this.createChartInput()],
+        };
+      }
 
-      charts: current.charts.filter((chart) => chart.chartId !== chartId),
-    }));
+      return {
+        ...current,
+        charts: current.charts.filter(
+          (chart) => chart.chartId !== chartId,
+        ),
+      };
+    });
 
     return true;
   }

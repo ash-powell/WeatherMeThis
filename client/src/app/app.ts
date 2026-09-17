@@ -490,10 +490,27 @@ export class App implements OnInit {
     });
   }
 
-  deleteReport(): void {
+  async deleteReport(): Promise<void> {
     if (!this.reportId()) {
       this.showMessage('No saved story is selected');
 
+      return;
+    }
+
+    const storyName =
+      this.loadedStoryName()?.trim() || 'the selected story';
+
+    const shouldDelete = await this.dialogs.confirm({
+      title: 'Delete story?',
+      message:
+        `Are you sure you want to permanently delete this story: ${storyName}? ` +
+        '\nThis cannot be undone.',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      confirmDanger: true,
+    });
+
+    if (!shouldDelete) {
       return;
     }
 
@@ -510,26 +527,6 @@ export class App implements OnInit {
         }
       },
     });
-  }
-
-  async startOver(): Promise<void> {
-    const shouldReset = await this.dialogs.confirm({
-      title: 'Start over?',
-      message:
-        'This will discard all current story settings and chart data.\n' +
-        'No saved stories will be deleted.',
-      confirmLabel: 'Start Over',
-      cancelLabel: 'Cancel',
-    });
-
-    if (!shouldReset) {
-      return;
-    }
-
-    this.reportFacade.resetEditor();
-    this.reportDraftStorage.clear();
-    this.autopopulate = false;
-    this.statusMessage = '';
   }
 
   ////////////////////////////////////////////////////////////////////////////////

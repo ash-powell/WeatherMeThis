@@ -34,15 +34,6 @@
         @if (galleryActive()) {
           <a routerLink="/"> Story Editor </a>
         } @else {
-          <button
-            type="button"
-            class="app-button app-button--warning start-over-button"
-            aria-label="Start over"
-            title = "Start over"
-            (click) = "startOver()"
-          >
-            ❌
-          </button>
           <a routerLink="/gallery"> Public Gallery </a>
           <a href="https://weathermethis.com/gallery/6aa5daa864d7278aa1abb785"> Tutorial </a>
         }
