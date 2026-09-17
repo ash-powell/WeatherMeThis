@@ -21,6 +21,8 @@ import type { QueryLocation } from '../../../locations/models/location.models';
 
 import type { GroupBy } from '../../../weather/models/analysis.models';
 
+import { ReportCharts } from '../report-charts/report-charts';
+
 export interface SeriesRequest {
   chartId: number;
   series: SeriesInput;
@@ -33,7 +35,7 @@ export interface ChartDataRequest {
 
 @Component({
   selector: 'app-report-editor',
-  imports: [FormsModule, ReportHelpDialog],
+  imports: [FormsModule, ReportHelpDialog, ReportCharts],
   templateUrl: './report-editor.html',
   styleUrl: './report-editor.scss',
 })

@@ -1,89 +1,10 @@
 <section class="series-list" aria-label="Chart series">
-  <!----------------------- Iterate over charts to build forms  --------------->
+  <!----------Iterate over charts to build all forms and print chart  --------->
   @for (chart of report().charts; track chart.chartId; let chartIndex = $index) {
+
     <section class="chart-editor">
-      <div class="chart-editor-heading">
-        <div
-          class="chart-position mobile-hide-until-chart"
-          [class.mobile-before-data]="chart.graphSeries.length === 0"
-        >
-          <div class="chart-order-buttons">
-            <button
-              type="button"
-              class="app-button app-button--secondary"
-              [disabled]="chartIndex === 0"
-              [attr.aria-label]="'Move chart ' + (chartIndex + 1) + ' up'"
-              (click)="moveChart(chart.chartId, -1)"
-            >
-              ↑
-            </button>
-            <button
-              type="button"
-              class="app-button app-button--secondary"
-              [disabled]="chartIndex === report().charts.length - 1"
-              [attr.aria-label]="'Move chart ' + (chartIndex + 1) + ' down'"
-              (click)="moveChart(chart.chartId, 1)"
-            >
-              ↓
-            </button>
-          </div>
-          <h2>Chart {{ chartIndex + 1 }}</h2>
-        </div>
 
-        <div
-          class="chart-name-field mobile-hide-until-chart"
-          [class.mobile-before-data]="chart.graphSeries.length === 0"
-        >
-          <input
-            type="text"
-            maxlength="100"
-            placeholder="Optional Chart Name"
-            aria-label="Optional Chart Name"
-            [name]="'chartName-' + chart.chartId"
-            [ngModel]="chart.name"
-            (ngModelChange)="setChartName(chart.chartId, $event)"
-          />
-        </div>
-
-        <button
-          type="button"
-          class="app-button app-button--danger mobile-hide-until-chart"
-          [class.mobile-before-data]="chart.graphSeries.length === 0"
-          (click)="deleteInputChart(chart.chartId)"
-        >
-          Delete Chart
-        </button>
-
-        <button
-          type="button"
-          class="app-button app-button--secondary add-chart-button"
-          (click)="addChart(chart.chartId)"
-        >
-          Add Chart
-        </button>
-
-        <button
-          type="button"
-          class = "app-button app-button--secondary chart-forms-toggle"
-          (click) = "toggleChartForms(chart.chartId)"
-        >
-          {{ chartHasExpandedForms(chart.chartId) ? 'Collapse Forms' : 'Expand Forms' }}
-        </button>
-
-        <label class="chart-comments-control">
-          Comments
-
-          <textarea
-            maxlength="10000"
-            [name]="'chartComments-' + chart.chartId"
-            [ngModel]="chart.comments"
-            (ngModelChange)="setChartComments(chart.chartId, $event)"
-            placeholder="Add comments about this chart"
-          ></textarea>
-        </label>
-      </div>
-
-      <!----------------- Iterate over each series building forms  --------------- -->
+      <!--------------- Iterate over series to build each form  --------------->
       @for (series of chart.seriesInputs; track series.seriesId) {
         <details
           class="series-details"
@@ -526,6 +447,94 @@
       }
       <!------------------- End series iteration section -------------------->
     </section>
+
+
+
+      <div class="chart-editor-heading chart-wide-controls">
+        <div
+          class="chart-position mobile-hide-until-chart"
+          [class.mobile-before-data]="chart.graphSeries.length === 0"
+        >
+          <div class="chart-order-buttons">
+            <button
+              type="button"
+              class="app-button app-button--secondary"
+              [disabled]="chartIndex === 0"
+              [attr.aria-label]="'Move chart ' + (chartIndex + 1) + ' up'"
+              (click)="moveChart(chart.chartId, -1)"
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              class="app-button app-button--secondary"
+              [disabled]="chartIndex === report().charts.length - 1"
+              [attr.aria-label]="'Move chart ' + (chartIndex + 1) + ' down'"
+              (click)="moveChart(chart.chartId, 1)"
+            >
+              ↓
+            </button>
+          </div>
+          <h2>Chart {{ chartIndex + 1 }}</h2>
+        </div>
+
+        <div
+          class="chart-name-field mobile-hide-until-chart"
+          [class.mobile-before-data]="chart.graphSeries.length === 0"
+        >
+          <input
+            type="text"
+            maxlength="100"
+            placeholder="Optional Chart Name"
+            aria-label="Optional Chart Name"
+            [name]="'chartName-' + chart.chartId"
+            [ngModel]="chart.name"
+            (ngModelChange)="setChartName(chart.chartId, $event)"
+          />
+        </div>
+
+        <button
+          type="button"
+          class="app-button app-button--danger mobile-hide-until-chart"
+          [class.mobile-before-data]="chart.graphSeries.length === 0"
+          (click)="deleteInputChart(chart.chartId)"
+        >
+          Delete Chart
+        </button>
+
+        <button
+          type="button"
+          class="app-button app-button--secondary add-chart-button"
+          (click)="addChart(chart.chartId)"
+        >
+          Add Chart
+        </button>
+
+        <button
+          type="button"
+          class = "app-button app-button--secondary chart-forms-toggle"
+          (click) = "toggleChartForms(chart.chartId)"
+        >
+          {{ chartHasExpandedForms(chart.chartId) ? 'Collapse Forms' : 'Expand Forms' }}
+        </button>
+
+        <label class="chart-comments-control">
+          Comments
+
+          <textarea
+            maxlength="10000"
+            [name]="'chartComments-' + chart.chartId"
+            [ngModel]="chart.comments"
+            (ngModelChange)="setChartComments(chart.chartId, $event)"
+            placeholder="Add comments about this chart"
+          ></textarea>
+        </label>
+      </div>
+
+      <app-report-charts [charts]="[chart]" />
+
+
+
   }
 </section>
 <!------------------------- End chart iteration section --------------------->
