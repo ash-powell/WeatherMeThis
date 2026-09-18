@@ -67,7 +67,8 @@
   gap: 0.25rem;
 }
 
-.site-navigation a {
+.site-navigation a,
+.site-navigation .tutorial-button {
   min-height: 32px;
   padding: 0.4rem 0.55rem;
 
@@ -79,19 +80,22 @@
   border: 1px solid #002d7a;
   border-radius: 0.35rem;
   font-size: 0.78rem;
+  font-family: inherit;
   font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
 }
 
 @media (hover: hover) {
-  .site-navigation a:hover {
+  .site-navigation a:hover,
+  .site-navigation .tutorial-button:hover:not(:disabled) {
     background-color: #eaf5ff;
     border-color: #0b64d0;
   }
 }
 
-.site-navigation a:focus-visible {
+.site-navigation a:focus-visible,
+.site-navigation .tutorial-button:focus-visible {
   outline: 2px solid #2aa5fc;
   outline-offset: 2px;
 }
@@ -119,6 +123,7 @@
 
 /* Keep the primary navigation buttons aligned with Log in / Sign up. */
 .site-navigation a,
+.site-navigation .tutorial-button,
 .account-actions .app-button{
   box-sizing: border-box;
   height: 44px;
@@ -346,7 +351,8 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .site-navigation a {
+  .site-navigation a,
+  .site-navigation .tutorial-button {
     justify-content: center;
     min-height: 44px;
     font-size: 0.95rem;
@@ -528,7 +534,8 @@
     order: 1;
     width: 100%;
   }
-  .header-controls .site-navigation a {
+  .header-controls .site-navigation a,
+  .header-controls .site-navigation .tutorial-button {
     width: 100%;
     justify-content: center;
   }

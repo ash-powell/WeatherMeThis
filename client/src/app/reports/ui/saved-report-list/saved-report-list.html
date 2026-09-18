@@ -1,38 +1,73 @@
-@if (reports().length > 0) {
-  <section class="saved-reports">
-    <div class="saved-list-heading">
-      <h2>Saved Stories</h2>
-      <button type="button" class="publication-button" (click)="closed.emit()">Close</button>
+<div class="saved-stories-backdrop" (click)="closed.emit()">
+  <section
+    class="saved-stories-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="saved-stories-title"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="saved-stories-heading">
+      <h2 id="saved-stories-title">My Saved Stories</h2>
+
+      <button
+        type="button"
+        class="dialog-close-button"
+        aria-label="Close saved stories"
+        (click)="closed.emit()"
+      >
+        &times;
+      </button>
+    </header>
+
+    <div class="saved-stories-filters">
+      <label>
+        <span>Search</span>
+        <input
+          type="search"
+          autocomplete="off"
+          placeholder="Search story names"
+          autofocus
+          [value]="searchText()"
+          (input)="updateSearch($event)"
+        />
+      </label>
+
+      <label>
+        <span>Sort by</span>
+        <select [value]="sortOrder()" (change)="updateSort($event)">
+          <option value="dateNewest">Newest first</option>
+          <option value="dateOldest">Oldest first</option>
+          <option value="nameAscending">Name: A–Z</option>
+          <option value="nameDescending">Name: Z–A</option>
+        </select>
+      </label>
     </div>
 
-    <ul class="saved-report-list">
-      @for (report of reports(); track report._id) {
-        <li>
-          <button type="button" class="saved-report-button" (click)="reportSelected.emit(report)">
-            {{ report.name }}
-          </button>
-
-          @if (report.isPublic) {
-            <a class="gallery-link" [routerLink]="['/gallery', report._id]"> View public story </a>
-
-            <button
-              type="button"
-              class="publication-button"
-              (click)="unpublishRequested.emit(report)"
-            >
-              Unpublish
-            </button>
-          } @else {
-            <button
-              type="button"
-              class="publication-button"
-              (click)="publishRequested.emit(report)"
-            >
-              Publish
-            </button>
+    <div class="saved-stories-results" aria-live="polite">
+      @if (loading()) {
+        <p class="saved-stories-message">Loading saved stories...</p>
+      } @else if (reports().length === 0) {
+        <p class="saved-stories-message">You do not have any saved stories yet.</p>
+      } @else if (displayedReports().length === 0) {
+        <p class="saved-stories-message">No saved stories match that search.</p>
+      } @else {
+        <ul class="saved-report-list">
+          @for (report of displayedReports(); track report._id) {
+            <li>
+              <button
+                type="button"
+                class="saved-report-button"
+                (click)="reportSelected.emit(report)"
+              >
+                <span class="saved-report-name">{{ report.name }}</span>
+                <time [attr.datetime]="report.createdAt">
+                  {{ report.createdAt | date: 'mediumDate' }}
+                </time>
+              </button>
+            </li>
           }
-        </li>
+        </ul>
       }
-    </ul>
+    </div>
   </section>
-}
+</div>

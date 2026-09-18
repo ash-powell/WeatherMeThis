@@ -45,7 +45,7 @@ describe('Gallery chart comments', () => {
     const content = fixture.nativeElement.querySelector('.report-chart-content') as HTMLElement;
 
     expect(title.textContent).toContain('Raleigh temperatures');
-    expect(toggle.textContent).toContain('Collapse Chart');
+    expect(toggle.textContent).toContain('Hide Chart');
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
     expect(content.hidden).toBe(false);
     expect(fixture.nativeElement.querySelectorAll('.chart-separator')).toHaveLength(1);
@@ -54,14 +54,14 @@ describe('Gallery chart comments', () => {
     fixture.detectChanges();
 
     expect(title.textContent).toContain('Raleigh temperatures');
-    expect(toggle.textContent).toContain('Expand Chart');
+    expect(toggle.textContent).toContain('Show Chart');
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
     expect(content.hidden).toBe(true);
 
     toggle.click();
     fixture.detectChanges();
 
-    expect(toggle.textContent).toContain('Collapse Chart');
+    expect(toggle.textContent).toContain('Hide Chart');
     expect(content.hidden).toBe(false);
     fixture.destroy();
   });

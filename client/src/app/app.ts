@@ -1,4 +1,12 @@
-import { Component, ElementRef, HostListener, inject, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  inject,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -24,7 +32,6 @@ import { buildReportRequest as buildReportRequestResult } from './reports/domain
 
 import { SavedReportList } from './reports/ui/saved-report-list/saved-report-list';
 import { ReportEditor } from './reports/ui/report-editor/report-editor';
-import { ReportCharts } from './reports/ui/report-charts/report-charts';
 import { AccountMenu } from './account/ui/account-menu/account-menu';
 import { GalleryFacade } from './gallery/application/gallery-facade';
 import { DialogService } from './shared/application/dialog.service';
@@ -73,6 +80,11 @@ export class App implements OnInit {
   readonly reportId = this.reportFacade.reportId;
   readonly selectedReportIsPublic = this.reportFacade.selectedReportIsPublic;
   readonly loadedStoryName = this.reportFacade.loadedStoryName;
+  readonly savedStoriesOpen = signal(false);
+  readonly savedStoriesLoading = signal(false);
+  readonly tutorialLoading = signal(false);
+
+  private readonly tutorialReportId = '6aa5daa864d7278aa1abb785';
 
   hasDisplayedChart(): boolean {
     return this.report().charts.some((chart) => chart.graphSeries.length > 0);
@@ -89,6 +101,7 @@ export class App implements OnInit {
   );
 
   closeSavedReports(): void {
+    this.savedStoriesOpen.set(false);
     this.reportFacade.closeSavedReports();
   }
 
@@ -196,9 +209,18 @@ export class App implements OnInit {
     }
   }
 
-  getSavedReports(): void {
+  openSavedReports(): void {
+    this.savedStoriesOpen.set(true);
+    this.savedStoriesLoading.set(true);
+
     this.reportFacade.loadSavedReports().subscribe({
+      next: () => {
+        this.savedStoriesLoading.set(false);
+      },
+
       error: (error) => {
+        this.savedStoriesLoading.set(false);
+        this.savedStoriesOpen.set(false);
         console.error('Report retrieval failed:', error);
 
         if (error.status === 401) {
@@ -210,12 +232,33 @@ export class App implements OnInit {
     });
   }
 
-  publishReport(saved: SavedReport): void {
-    this.publishReportById(saved._id);
-  }
+  openTutorial(): void {
+    if (this.tutorialLoading()) {
+      return;
+    }
 
-  unpublishReport(saved: SavedReport): void {
-    this.unpublishReportById(saved._id);
+    this.tutorialLoading.set(true);
+    this.dialogs.showLoading('Loading tutorial...', 'Tutorial');
+
+    this.galleryFacade.loadReport(this.tutorialReportId).subscribe({
+      next: ({ report, charts }) => {
+        this.reportFacade.openReportCopy(report, charts);
+        this.tutorialLoading.set(false);
+        this.dialogs.close();
+        void this.router.navigateByUrl('/');
+      },
+      error: (error: HttpErrorResponse) => {
+        this.tutorialLoading.set(false);
+        console.error('Tutorial retrieval failed:', error);
+
+        this.dialogs.show(
+          error.status === 404
+            ? 'The tutorial story is not currently available.'
+            : 'Unable to load the tutorial story. Please try again.',
+          'Tutorial',
+        );
+      },
+    });
   }
 
   toggleSelectedReportPublication(): void {
@@ -260,7 +303,6 @@ export class App implements OnInit {
         if (this.reportId() === reportId) {
           this.reportFacade.setSelectedReportPublication(true);
         }
-        this.getSavedReports();
       },
       error: (error) => {
         console.error('Report publication failed:', error);
@@ -281,7 +323,6 @@ export class App implements OnInit {
         if (this.reportId() === reportId) {
           this.reportFacade.setSelectedReportPublication(false);
         }
-        this.getSavedReports();
       },
       error: (error) => {
         console.error('Report unpublishing failed:', error);
@@ -451,6 +492,7 @@ export class App implements OnInit {
   }
 
   selectReport(saved: SavedReport): void {
+    this.savedStoriesOpen.set(false);
     const charts = this.reportFacade.selectReport(saved);
 
     for (const chart of charts) {
@@ -497,8 +539,7 @@ export class App implements OnInit {
       return;
     }
 
-    const storyName =
-      this.loadedStoryName()?.trim() || 'the selected story';
+    const storyName = this.loadedStoryName()?.trim() || 'the selected story';
 
     const shouldDelete = await this.dialogs.confirm({
       title: 'Delete story?',

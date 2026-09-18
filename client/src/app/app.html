@@ -35,7 +35,14 @@
           <a routerLink="/"> Story Editor </a>
         } @else {
           <a routerLink="/gallery"> Public Gallery </a>
-          <a href="https://weathermethis.com/gallery/6aa5daa864d7278aa1abb785"> Tutorial </a>
+          <button
+            type="button"
+            class="tutorial-button"
+            [disabled]="tutorialLoading()"
+            (click)="openTutorial()"
+          >
+            Tutorial
+          </button>
         }
       </nav>
       @if (!galleryActive() && (auth.isAuthenticated$ | async)) {
@@ -66,7 +73,7 @@
             <button
               type="button"
               class="app-button app-button--secondary"
-              (click)="storyMenu.open = false; getSavedReports()"
+              (click)="storyMenu.open = false; openSavedReports()"
             >
               My Saved Stories
             </button>
@@ -144,14 +151,6 @@
   @if (galleryActive()) {
     <router-outlet />
   } @else {
-    <app-saved-report-list
-      [reports]="savedReports()"
-      (closed)="closeSavedReports()"
-      (reportSelected)="selectReport($event)"
-      (publishRequested)="publishReport($event)"
-      (unpublishRequested)="unpublishReport($event)"
-    />
-
     <app-report-editor
       [report]="report()"
       [(autopopulate)]="autopopulate"
@@ -163,5 +162,14 @@
     <!-- <app-report-charts [charts]="report().charts" /> -->
   }
 </main>
+
+@if (savedStoriesOpen()) {
+  <app-saved-report-list
+    [reports]="savedReports()"
+    [loading]="savedStoriesLoading()"
+    (closed)="closeSavedReports()"
+    (reportSelected)="selectReport($event)"
+  />
+}
 
 <app-message-dialog />

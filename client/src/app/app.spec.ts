@@ -50,6 +50,36 @@ describe('App', () => {
     expect(compiled.textContent).not.toContain('Story Editor');
   });
 
+  it('opens saved stories in a modal and displays the retrieved stories', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    const http = TestBed.inject(HttpTestingController);
+
+    fixture.detectChanges();
+    app.openSavedReports();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('Loading saved stories...');
+
+    const request = http.expectOne((candidate) => candidate.url.endsWith('/reports'));
+    request.flush([
+      {
+        _id: 'saved-story-1',
+        name: 'Raleigh Weather',
+        charts: [],
+        createdAt: '2026-09-17T12:00:00.000Z',
+        isPublic: false,
+        publishedAt: null,
+        likeCount: 0,
+      },
+    ]);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Raleigh Weather');
+    http.verify();
+  });
+
   it('shows Get Data progress and confirms that the chart was built', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
