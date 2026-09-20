@@ -36,6 +36,10 @@ import { AccountMenu } from './account/ui/account-menu/account-menu';
 import { GalleryFacade } from './gallery/application/gallery-facade';
 import { DialogService } from './shared/application/dialog.service';
 import { MessageDialog } from './shared/ui/message-dialog/message-dialog';
+import {
+  HelpDocumentDialog,
+  type HelpDocumentType,
+} from './shared/ui/help-document-dialog/help-document-dialog';
 
 @Component({
   selector: 'app-root',
@@ -48,6 +52,7 @@ import { MessageDialog } from './shared/ui/message-dialog/message-dialog';
     RouterLink,
     RouterOutlet,
     MessageDialog,
+    HelpDocumentDialog,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -83,6 +88,7 @@ export class App implements OnInit {
   readonly savedStoriesOpen = signal(false);
   readonly savedStoriesLoading = signal(false);
   readonly tutorialLoading = signal(false);
+  readonly activeHelpDocument = signal<HelpDocumentType | null>(null);
 
   private readonly tutorialReportId = '6aa5daa864d7278aa1abb785';
 
@@ -106,13 +112,27 @@ export class App implements OnInit {
   }
 
   @ViewChild('storyMenu') private storyMenu?: ElementRef<HTMLDetailsElement>;
+  @ViewChild('helpMenu') private helpMenu?: ElementRef<HTMLDetailsElement>;
 
   @HostListener('document:click', ['$event'])
   closeStoryMenuOutside(event: Event): void {
-    const menu = this.storyMenu?.nativeElement;
-    if (menu && event.target instanceof Node && !menu.contains(event.target)) {
-      menu.open = false;
+    if (!(event.target instanceof Node)) {
+      return;
     }
+
+    for (const menu of [this.storyMenu?.nativeElement, this.helpMenu?.nativeElement]) {
+      if (menu && !menu.contains(event.target)) {
+        menu.open = false;
+      }
+    }
+  }
+
+  openHelpDocument(documentType: HelpDocumentType): void {
+    this.activeHelpDocument.set(documentType);
+  }
+
+  closeHelpDocument(): void {
+    this.activeHelpDocument.set(null);
   }
 
   setReportName(name: string): void {

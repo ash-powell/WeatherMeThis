@@ -35,14 +35,41 @@
           <a routerLink="/"> Story Editor </a>
         } @else {
           <a routerLink="/gallery"> Public Gallery </a>
-          <button
-            type="button"
-            class="tutorial-button"
-            [disabled]="tutorialLoading()"
-            (click)="openTutorial()"
+          <details
+            class="help-menu"
+            #helpMenu
+            (keydown.escape)="helpMenu.open = false; helpMenuSummary.focus()"
           >
-            Tutorial
-          </button>
+            <summary #helpMenuSummary>Help</summary>
+
+            <div class="help-menu-actions" role="menu" aria-label="Help">
+              <button
+                type="button"
+                role="menuitem"
+                (click)="helpMenu.open = false; openHelpDocument('instructions')"
+              >
+                Instructions
+              </button>
+
+              <button
+                type="button"
+                role="menuitem"
+                (click)="helpMenu.open = false; openHelpDocument('faq')"
+              >
+                FAQ
+              </button>
+
+              <!-- todo, disable until complete -->
+              <!-- <button
+                type="button"
+                role="menuitem"
+                [disabled]="tutorialLoading()"
+                (click)="helpMenu.open = false; openTutorial()"
+              >
+                Tutorial
+              </button> -->
+            </div>
+          </details>
         }
       </nav>
       @if (!galleryActive() && (auth.isAuthenticated$ | async)) {
@@ -170,6 +197,10 @@
     (closed)="closeSavedReports()"
     (reportSelected)="selectReport($event)"
   />
+}
+
+@if (activeHelpDocument(); as documentType) {
+  <app-help-document-dialog [documentType]="documentType" (closed)="closeHelpDocument()" />
 }
 
 <app-message-dialog />

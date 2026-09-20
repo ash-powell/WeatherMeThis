@@ -68,7 +68,7 @@
 }
 
 .site-navigation a,
-.site-navigation .tutorial-button {
+.site-navigation .help-menu > summary {
   min-height: 32px;
   padding: 0.4rem 0.55rem;
 
@@ -88,14 +88,14 @@
 
 @media (hover: hover) {
   .site-navigation a:hover,
-  .site-navigation .tutorial-button:hover:not(:disabled) {
+  .site-navigation .help-menu > summary:hover {
     background-color: #eaf5ff;
     border-color: #0b64d0;
   }
 }
 
 .site-navigation a:focus-visible,
-.site-navigation .tutorial-button:focus-visible {
+.site-navigation .help-menu > summary:focus-visible {
   outline: 2px solid #2aa5fc;
   outline-offset: 2px;
 }
@@ -123,8 +123,8 @@
 
 /* Keep the primary navigation buttons aligned with Log in / Sign up. */
 .site-navigation a,
-.site-navigation .tutorial-button,
-.account-actions .app-button{
+.site-navigation .help-menu > summary,
+.account-actions .app-button {
   box-sizing: border-box;
   height: 44px;
   min-height: 44px;
@@ -352,7 +352,7 @@
   }
 
   .site-navigation a,
-  .site-navigation .tutorial-button {
+  .site-navigation .help-menu > summary {
     justify-content: center;
     min-height: 44px;
     font-size: 0.95rem;
@@ -487,7 +487,8 @@
 .story-menu {
   position: relative;
 }
-.story-menu summary {
+.story-menu summary,
+.help-menu > summary {
   cursor: pointer;
   padding: 0.55rem 0.8rem;
   border: 1px solid #002d7a;
@@ -512,6 +513,57 @@
   border-radius: 0.5rem;
   box-shadow: 0 8px 24px #0003;
 }
+.help-menu {
+  position: relative;
+}
+.help-menu-actions {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 200;
+
+  display: grid;
+  width: 12rem;
+  max-width: 85vw;
+  overflow: hidden;
+
+  background: white;
+  border: 1px solid #94a3b8;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px #0003;
+}
+.help-menu-actions button {
+  min-height: 2.75rem;
+  padding: 0.6rem 0.75rem;
+
+  color: #1e293b;
+  background: white;
+  border: 0;
+  border-bottom: 1px solid #e2e8f0;
+
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.help-menu-actions button:last-child {
+  border-bottom: 0;
+}
+.help-menu-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+@media (hover: hover) {
+  .help-menu-actions button:hover:not(:disabled) {
+    background: #eaf5ff;
+  }
+}
+.help-menu-actions button:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 3px solid #69b9ff;
+  outline-offset: -3px;
+}
 .story-menu summary:focus-visible {
   outline: 3px solid #0b64d0;
   outline-offset: 3px;
@@ -534,8 +586,13 @@
     order: 1;
     width: 100%;
   }
+  .header-controls .site-navigation > a,
+  .header-controls .site-navigation .help-menu {
+    flex: 1 1 0;
+    min-width: 0;
+  }
   .header-controls .site-navigation a,
-  .header-controls .site-navigation .tutorial-button {
+  .header-controls .site-navigation .help-menu > summary {
     width: 100%;
     justify-content: center;
   }

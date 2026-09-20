@@ -2,9 +2,7 @@
   <!----------Iterate over charts to build all forms and print chart --------->
 
   @for (chart of report().charts; track chart.chartId; let chartIndex = $index) {
-    <section class="chart-editor"
-      [hidden] = "controlsHidden(chart.chartId)"
-    >
+    <section class="chart-editor" [hidden]="controlsHidden(chart.chartId)">
       <!--------------- Iterate over series to build each form --------------->
 
       @for (series of chart.seriesInputs; track series.seriesId) {
@@ -29,9 +27,7 @@
 
               <div class="form-grid">
                 <div class="form-field form-field--wide">
-                  <label [for]="'location-search-' + series.seriesId">
-                    City or airport
-                  </label>
+                  <label [for]="'location-search-' + series.seriesId"> City or airport </label>
 
                   <div class="input-button-group">
                     <input
@@ -48,15 +44,14 @@
                       class="app-button app-button--secondary mandatory-button"
                       (click)="searchCity(chart.chartId, series)"
                     >
-                      Find Coordinates
+                      Set Location
                     </button>
                   </div>
                 </div>
 
-                <div class="form-field">
-                  <label [for]="'latitude-' + series.seriesId">
-                    Latitude
-                  </label>
+                <!-- Coordinates are populated by location search and retained for requests and saved stories. -->
+                <div class="form-field coordinate-field">
+                  <label [for]="'latitude-' + series.seriesId"> Latitude </label>
 
                   <input
                     [id]="'latitude-' + series.seriesId"
@@ -67,10 +62,8 @@
                   />
                 </div>
 
-                <div class="form-field">
-                  <label [for]="'longitude-' + series.seriesId">
-                    Longitude
-                  </label>
+                <div class="form-field coordinate-field">
+                  <label [for]="'longitude-' + series.seriesId"> Longitude </label>
 
                   <input
                     [id]="'longitude-' + series.seriesId"
@@ -126,9 +119,7 @@
 
               <div class="form-grid">
                 <div class="form-field">
-                  <label [for]="'start-date-' + series.seriesId">
-                    Start date
-                  </label>
+                  <label [for]="'start-date-' + series.seriesId"> Start date </label>
 
                   <input
                     [id]="'start-date-' + series.seriesId"
@@ -136,20 +127,13 @@
                     type="date"
                     [ngModel]="series.startDate"
                     (ngModelChange)="
-                      setSeriesField(
-                        chart.chartId,
-                        series.seriesId,
-                        'startDate',
-                        $event
-                      )
+                      setSeriesField(chart.chartId, series.seriesId, 'startDate', $event)
                     "
                   />
                 </div>
 
                 <div class="form-field">
-                  <label [for]="'end-date-' + series.seriesId">
-                    End date
-                  </label>
+                  <label [for]="'end-date-' + series.seriesId"> End date </label>
 
                   <input
                     [id]="'end-date-' + series.seriesId"
@@ -157,12 +141,7 @@
                     type="date"
                     [ngModel]="series.endDate"
                     (ngModelChange)="
-                      setSeriesField(
-                        chart.chartId,
-                        series.seriesId,
-                        'endDate',
-                        $event
-                      )
+                      setSeriesField(chart.chartId, series.seriesId, 'endDate', $event)
                     "
                   />
                 </div>
@@ -174,21 +153,14 @@
 
               <div class="form-grid">
                 <div class="form-field">
-                  <label [for]="'date-filter-' + series.seriesId">
-                    Filter dates by
-                  </label>
+                  <label [for]="'date-filter-' + series.seriesId"> Filter dates by </label>
 
                   <select
                     [id]="'date-filter-' + series.seriesId"
                     [name]="'dateFilter-' + series.seriesId"
                     [ngModel]="series.dateFilter.unit"
                     (ngModelChange)="
-                      setDateFilterField(
-                        chart.chartId,
-                        series.seriesId,
-                        'unit',
-                        $event
-                      )
+                      setDateFilterField(chart.chartId, series.seriesId, 'unit', $event)
                     "
                   >
                     <option value="none">optional</option>
@@ -202,9 +174,7 @@
 
                 @if (series.dateFilter.unit !== 'none') {
                   <div class="form-field">
-                    <label [for]="'date-filter-min-' + series.seriesId">
-                      From
-                    </label>
+                    <label [for]="'date-filter-min-' + series.seriesId"> From </label>
 
                     <input
                       [id]="'date-filter-min-' + series.seriesId"
@@ -212,20 +182,13 @@
                       type="text"
                       [ngModel]="series.dateFilter.min"
                       (ngModelChange)="
-                        setDateFilterField(
-                          chart.chartId,
-                          series.seriesId,
-                          'min',
-                          $event
-                        )
+                        setDateFilterField(chart.chartId, series.seriesId, 'min', $event)
                       "
                     />
                   </div>
 
                   <div class="form-field">
-                    <label [for]="'date-filter-max-' + series.seriesId">
-                      Through
-                    </label>
+                    <label [for]="'date-filter-max-' + series.seriesId"> Through </label>
 
                     <input
                       [id]="'date-filter-max-' + series.seriesId"
@@ -233,12 +196,7 @@
                       type="text"
                       [ngModel]="series.dateFilter.max"
                       (ngModelChange)="
-                        setDateFilterField(
-                          chart.chartId,
-                          series.seriesId,
-                          'max',
-                          $event
-                        )
+                        setDateFilterField(chart.chartId, series.seriesId, 'max', $event)
                       "
                     />
                   </div>
@@ -248,7 +206,7 @@
 
             <section class="form-section">
               <div class="section-heading">
-                <h3>Analysis</h3>
+                <h3>Aggregation</h3>
 
                 <button
                   type="button"
@@ -262,61 +220,34 @@
 
               <div class="form-grid">
                 <div class="form-field">
-                  <label [for]="'aggregation-' + series.seriesId">
-                    "Chart the..."
-                  </label>
-
+                  <label [for]="'aggregation-' + series.seriesId"> Chart the... </label>
                   <select
                     [id]="'aggregation-' + series.seriesId"
                     [name]="'aggregation-' + series.seriesId"
                     [ngModel]="series.aggregation"
                     (ngModelChange)="
-                      setSeriesField(
-                        chart.chartId,
-                        series.seriesId,
-                        'aggregation',
-                        $event
-                      )
+                      setSeriesField(chart.chartId, series.seriesId, 'aggregation', $event)
                     "
                   >
-                    <option [ngValue]="null" disabled>
-                      Select aggregation
-                    </option>
+                    <option [ngValue]="null" disabled>Select aggregation</option>
 
-                    <option value="rawValues">
-                      Actual non-aggregated values
-                    </option>
+                    <option value="rawValues">Non-aggregated values</option>
 
-                    <option value="count">
-                      Number of days
-                    </option>
+                    <option value="count">Number of days</option>
 
-                    <option value="sum">
-                      Sum
-                    </option>
+                    <option value="sum">Sum</option>
 
-                    <option value="max">
-                      Maximum
-                    </option>
+                    <option value="max">Maximum</option>
 
-                    <option value="min">
-                      Minimum
-                    </option>
+                    <option value="min">Minimum</option>
 
-                    <option value="avgCnt">
-                      Average number of days
-                    </option>
+                    <option value="avgCnt">Average number of days</option>
 
-                    <option value="avgSum">
-                      Average amount
-                    </option>
+                    <option value="avgSum">Average amount</option>
                   </select>
                 </div>
 
-                @if (
-                  series.aggregation === 'avgCnt' ||
-                  series.aggregation === 'avgSum'
-                ) {
+                @if (series.aggregation === 'avgCnt' || series.aggregation === 'avgSum') {
                   <div class="form-field">
                     <label [for]="'average-frequency-' + series.seriesId">
                       Average frequency
@@ -327,40 +258,25 @@
                       [name]="'avgFrequency-' + series.seriesId"
                       [ngModel]="series.avgFrequency"
                       (ngModelChange)="
-                        setSeriesField(
-                          chart.chartId,
-                          series.seriesId,
-                          'avgFrequency',
-                          $event
-                        )
+                        setSeriesField(chart.chartId, series.seriesId, 'avgFrequency', $event)
                       "
                     >
-                      <option value="none">
-                        Select frequency
-                      </option>
+                      <option value="none">Select frequency</option>
 
-                      <option value="daily">
-                        Daily
-                      </option>
+                      <option value="daily">Daily</option>
 
-                      <option value="weekly">
-                        Weekly
-                      </option>
+                      <option value="weekly">Weekly</option>
 
-                      <option value="monthly">
-                        Monthly
-                      </option>
+                      <option value="monthly">Monthly</option>
 
-                      <option value="yearly">
-                        Yearly
-                      </option>
+                      <option value="yearly">Yearly</option>
                     </select>
                   </div>
                 }
 
                 <div class="form-field">
                   <label [for]="'measurement-' + series.seriesId">
-                    "of the recorded values of..."
+                    of this measurement...
                   </label>
 
                   <select
@@ -368,17 +284,10 @@
                     [name]="'measurement-' + series.seriesId"
                     [ngModel]="series.measurement"
                     (ngModelChange)="
-                      setSeriesField(
-                        chart.chartId,
-                        series.seriesId,
-                        'measurement',
-                        $event
-                      )
+                      setSeriesField(chart.chartId, series.seriesId, 'measurement', $event)
                     "
                   >
-                    <option [ngValue]="null" disabled>
-                      Select measurement
-                    </option>
+                    <option [ngValue]="null" disabled>Select measurement</option>
 
                     @for (option of measurementOptions; track option.value) {
                       <option [value]="option.value">
@@ -390,49 +299,64 @@
                 </div>
 
                 <div class="form-field">
-                  <label [for]="'group-by-' + series.seriesId">
-                    "calculated for each group of..."
-                  </label>
+                  <label [for]="'comparison-' + series.seriesId"> but only values that pass this filter </label>
 
                   <select
-                    [id]="'group-by-' + series.seriesId"
-                    [name]="'groupBy-' + series.seriesId"
-                    [ngModel]="chart.groupBy"
-                    (ngModelChange)="setGroupBy(chart.chartId, $event)"
+                    [id]="'comparison-' + series.seriesId"
+                    [name]="'comparison-' + series.seriesId"
+                    [ngModel]="series.comparison"
+                    (ngModelChange)="
+                      setSeriesField(chart.chartId, series.seriesId, 'comparison', $event)
+                    "
                   >
-                    <option [ngValue]="null" disabled>
-                      Select group-by
-                    </option>
+                    <option value="none">(No filter- include all values)</option>
 
-                    <option value="yearMonthDay">
-                      Single days (show every day)
-                    </option>
+                    <option value=">=">Greater than or equal to</option>
 
-                    <option value="day">
-                      Days of the month (30ish groups)
-                    </option>
+                    <option value="*<*=">Less than or equal to</option>
 
-                    <option value="month">
-                      Months of the year (12 groups)
-                    </option>
-
-                    <option value="monthDay">
-                      Days of the months of the year
-                    </option>
-
-                    <option value="yearMonth">
-                      Each month of each year
-                    </option>
-
-                    <option value="year">
-                      Each year
-                    </option>
-
-                    <option value="all">
-                      Entire data set (1 group)
-                    </option>
+                    <option value="=">Equal to</option>
                   </select>
                 </div>
+
+                @if (series.comparison !== 'none') {
+                  <div class="form-field">
+                    <label [for]="'threshold-' + series.seriesId">
+                      Threshold
+
+                      @if (series.measurement) {
+                        ({{ measurementUnit(series.measurement, chart.metricUnits) }})
+                      }
+                    </label>
+                    <input
+                      [id]="'threshold-' + series.seriesId"
+                      [name]="'threshold-' + series.seriesId"
+                      type="number"
+                      step="any"
+                      [ngModel]="series.threshold"
+                      (ngModelChange)="
+                        setSeriesField(chart.chartId, series.seriesId, 'threshold', $event)
+                      "
+                    />
+                  </div>
+                }
+                @if (series.aggregation === 'avgSum' && series.comparison !== 'none'){
+                  <div class="form-field">
+                    <label [for]="'onlyAvgPassingDays-' + series.seriesId">
+                      Only count days that pass
+                    </label>
+                    <input
+                      [id]="'onlyAvgPassingDays-' + series.seriesId"
+                      [name]="'onlyAvgPassingDays-' + series.seriesId"
+                      type="checkbox"
+                      /* [ngModel]="series.onlyAvgPassingDays" */
+                      /* (ngModelChange)=" */
+                        /* setSeriesField(chart.chartId, series.seriesId, 'onlyAvgPassingDays', $event) */
+                      /* " */
+                    >
+                  </div>
+                }
+
               </div>
 
               @if (measurementNote(series.measurement)) {
@@ -443,104 +367,46 @@
 
               @if (series.aggregation === 'rawValues') {
                 <p class="form-note">
-                  Non-aggregated values must be calculated for every individual
-                  day.
+                  Non-aggregated values must be grouped by Exact date.
                 </p>
               }
             </section>
 
             <section class="form-section">
-              <h3>Value filter</h3>
-
+              <h3>Group-by</h3>
               <div class="form-grid">
                 <div class="form-field">
-                  <label [for]="'comparison-' + series.seriesId">
-                    Only include values
+                  <label [for]="'group-by-' + series.seriesId">
+                    Chart a single point for each group of days that share the same...
                   </label>
 
                   <select
-                    [id]="'comparison-' + series.seriesId"
-                    [name]="'comparison-' + series.seriesId"
-                    [ngModel]="series.comparison"
-                    (ngModelChange)="
-                      setSeriesField(
-                        chart.chartId,
-                        series.seriesId,
-                        'comparison',
-                        $event
-                      )
-                    "
+                    [id]="'group-by-' + series.seriesId"
+                    [name]="'groupBy-' + series.seriesId"
+                    [ngModel]="chart.groupBy"
+                    (ngModelChange)="setGroupBy(chart.chartId, $event)"
                   >
-                    <option value="none">
-                      Without a threshold
-                    </option>
+                    <option [ngValue]="null" disabled>Select group-by</option>
 
-                    <option value=">=">
-                      Greater than or equal to
-                    </option>
+                    <option value="yearMonthDay">Exact date (no groups- show every day)</option>
 
-                    <option value="*<*=">
-                      Less than or equal to
-                    </option>
+                    <option value="day">Day of the month (30ish groups)</option>
 
-                    <option value="=">
-                      Equal to
-                    </option>
+                    <option value="month">Calendar month name (12 groups)</option>
+
+                    <option value="monthDay">Day of the year(365 groups)</option>
+
+                    <option value="yearMonth">Month of each year</option>
+
+                    <option value="year">Year</option>
+
+                    <option value="all">Date Range (One big group) *Tip: use bar graph</option>
                   </select>
                 </div>
 
-                @if (series.comparison !== 'none') {
-                  <div class="form-field">
-                    <label [for]="'threshold-' + series.seriesId">
-                      Threshold
 
-                      @if (series.measurement) {
-                        ({{
-                          measurementUnit(
-                            series.measurement,
-                            chart.metricUnits
-                          )
-                        }})
-                      }
-                    </label>
 
-                    <input
-                      [id]="'threshold-' + series.seriesId"
-                      [name]="'threshold-' + series.seriesId"
-                      type="number"
-                      step="any"
-                      [ngModel]="series.threshold"
-                      (ngModelChange)="
-                        setSeriesField(
-                          chart.chartId,
-                          series.seriesId,
-                          'threshold',
-                          $event
-                        )
-                      "
-                    />
-                  </div>
-                }
 
-                <div class="form-field">
-                  <input
-                    type="text"
-                    class="series-title-input"
-                    [id]="'series-title-' + series.seriesId"
-                    [name]="'series-title-' + series.seriesId"
-                    placeholder="Series title(optional)"
-                    aria-label="Series title (optional)"
-                    maxlength="100"
-                    [ngModel]="series.title ?? ''"
-                    (ngModelChange)="
-                      setSeriesTitle(
-                        chart.chartId,
-                        series.seriesId,
-                        $event
-                      )
-                    "
-                  />
-                </div>
               </div>
             </section>
 
@@ -615,21 +481,37 @@
 
                 Chart-wide edit mode
               </label>
+
+
+
+              <div class="series-title">
+                <label>Series Title</label>
+                <input
+                  type="text"
+                  /* class="series-title-input" */
+                  [id]="'series-title-' + series.seriesId"
+                  [name]="'series-title-' + series.seriesId"
+                  placeholder="optional"
+                  aria-label="Series title (optional)"
+                  maxlength="100"
+                  [ngModel]="series.title ?? ''"
+                  (ngModelChange)="setSeriesTitle(chart.chartId, series.seriesId, $event)"
+                />
+              </div>
+
+
+
             </div>
 
-            <p
-              class="form-note"
-              [id]="'unit-note-' + series.seriesId"
-            >
-              Metric selects units for all forms. Thresholds use the selected
-              units. Click Get Data to refresh this chart.
+            <p class="form-note" [id]="'unit-note-' + series.seriesId">
+              Metric selects units for all forms. Thresholds use the selected units. Click Get Data
+              to refresh this chart.
             </p>
           </div>
         </details>
       }
 
       <!------------------- End series iteration section -------------------->
-
 
       <div class="chart-wide-controls">
         <div
@@ -658,9 +540,7 @@
             </button>
           </div>
 
-          <h2>
-            Chart {{ chartIndex + 1 }}
-          </h2>
+          <h2>Chart {{ chartIndex + 1 }}</h2>
         </div>
 
         <div
@@ -700,11 +580,7 @@
           class="app-button app-button--secondary chart-forms-toggle"
           (click)="toggleChartForms(chart.chartId)"
         >
-          {{
-            chartHasExpandedForms(chart.chartId)
-              ? 'Collapse Forms'
-              : 'Expand Forms'
-          }}
+          {{ chartHasExpandedForms(chart.chartId) ? 'Collapse Forms' : 'Expand Forms' }}
         </button>
 
         <label class="chart-comments-control">
@@ -712,6 +588,7 @@
 
           <textarea
             maxlength="10000"
+            title="Drag the lower-right corner to resize comments"
             [name]="'chartComments-' + chart.chartId"
             [ngModel]="chart.comments"
             (ngModelChange)="setChartComments(chart.chartId, $event)"
@@ -721,18 +598,10 @@
       </div>
     </section>
 
-    <app-report-charts
-      [charts]="[chart]"
-      [showControlsToggle]="true"
-    />
-
+    <app-report-charts [charts]="[chart]" [showControlsToggle]="true" />
   }
 </section>
 
 <!------------------------- End chart iteration section --------------------->
 
-<app-report-help-dialog
-  [topic]="activeHelp"
-  [series]="helpSeries"
-  (closed)="closeHelp()"
-/>
+<app-report-help-dialog [topic]="activeHelp" [series]="helpSeries" (closed)="closeHelp()" />

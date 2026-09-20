@@ -1,0 +1,211 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+}
+
+.help-document-backdrop {
+  position: fixed;
+  inset: 0;
+
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+
+  background: rgb(15 23 42 / 55%);
+}
+
+.help-document-dialog {
+  display: flex;
+  flex-direction: column;
+
+  width: min(75vw, 72rem);
+  height: min(82vh, 54rem);
+  min-height: 24rem;
+  overflow: hidden;
+
+  color: #1e293b;
+  background: white;
+  border: 1px solid #94a3b8;
+  border-radius: 0.75rem;
+  box-shadow: 0 1.5rem 4rem rgb(15 23 42 / 38%);
+}
+
+.help-document-heading {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding: 0.85rem 1rem;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.help-document-heading h2 {
+  margin: 0;
+  color: #002d7a;
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+}
+
+.help-document-close {
+  display: inline-grid;
+  flex: 0 0 2.65rem;
+  width: 2.65rem;
+  height: 2.65rem;
+  padding: 0;
+  place-items: center;
+
+  color: #002d7a;
+  background: white;
+  border: 1px solid #94a3b8;
+  border-radius: 50%;
+
+  font: inherit;
+  font-size: 1.7rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.help-document-search {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 0.3rem;
+  padding: 0.75rem 1rem;
+
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.help-document-search label {
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.help-document-search input {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0.55rem 0.65rem;
+
+  color: #0f172a;
+  background: white;
+  border: 1px solid #94a3b8;
+  border-radius: 0.4rem;
+  font: inherit;
+}
+
+.help-document-content {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.25rem 1rem 1.25rem;
+  scroll-padding-top: 1rem;
+}
+
+.instruction-section {
+  padding-block: 0.9rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.instruction-section:last-child {
+  border-bottom: 0;
+}
+
+.instruction-section h3 {
+  margin: 0 0 0.55rem;
+  color: #002d7a;
+  font-size: 1.08rem;
+}
+
+.instruction-section p,
+.instruction-section li,
+.faq-answer p {
+  line-height: 1.55;
+}
+
+.instruction-section p,
+.faq-answer p {
+  margin: 0.45rem 0;
+}
+
+.instruction-section ol {
+  display: grid;
+  gap: 0.4rem;
+  margin-block: 0.65rem 0;
+  padding-left: 1.5rem;
+}
+
+.faq-list {
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 0.8rem;
+}
+
+.faq-item {
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+}
+
+.faq-item summary {
+  padding: 0.8rem 2.5rem 0.8rem 0.85rem;
+  color: #002d7a;
+  background: #f8fafc;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.faq-answer {
+  padding: 0.4rem 0.85rem 0.75rem;
+}
+
+.no-help-results {
+  margin: 3rem 0;
+  color: #64748b;
+  text-align: center;
+}
+
+@media (hover: hover) {
+  .help-document-close:hover,
+  .faq-item summary:hover {
+    background: #eaf5ff;
+  }
+}
+
+.help-document-close:focus-visible,
+.help-document-search input:focus-visible,
+.faq-item summary:focus-visible {
+  outline: 3px solid #69b9ff;
+  outline-offset: 2px;
+}
+
+@media (max-width: 42rem) {
+  .help-document-backdrop {
+    padding: 0.3rem;
+  }
+
+  .help-document-dialog {
+    width: 100%;
+    height: 95dvh;
+    min-height: 0;
+    border-radius: 0.55rem;
+  }
+
+  .help-document-heading,
+  .help-document-search {
+    padding-inline: 0.75rem;
+  }
+
+  .help-document-content {
+    padding-inline: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .help-document-close {
+    transition: none;
+  }
+}

@@ -50,6 +50,45 @@ describe('App', () => {
     expect(compiled.textContent).not.toContain('Story Editor');
   });
 
+  it('shows Instructions, FAQ, and Tutorial in the Help menu in that order', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
+    const menuItems = Array.from(
+      fixture.nativeElement.querySelectorAll('.help-menu-actions button'),
+      (button: Element) => button.textContent?.trim(),
+    );
+
+    expect(menuItems).toEqual(['Instructions', 'FAQ', 'Tutorial']);
+  });
+
+  it('opens searchable help documents and keeps a close button outside the scrolling content', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+
+    fixture.detectChanges();
+    app.openHelpDocument('instructions');
+    fixture.detectChanges();
+
+    const dialog = fixture.nativeElement.querySelector('.help-document-dialog') as HTMLElement;
+    const search = dialog.querySelector('input[type="search"]') as HTMLInputElement;
+
+    expect(dialog.textContent).toContain('Build your first chart');
+    expect(dialog.querySelector('.help-document-heading .help-document-close')).toBeTruthy();
+    expect(dialog.querySelector('.help-document-content .help-document-close')).toBeNull();
+
+    search.value = 'rate limit';
+    search.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(dialog.textContent).toContain('If a request fails');
+    expect(dialog.textContent).not.toContain('Build your first chart');
+
+    app.closeHelpDocument();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.help-document-dialog')).toBeNull();
+  });
+
   it('opens saved stories in a modal and displays the retrieved stories', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;

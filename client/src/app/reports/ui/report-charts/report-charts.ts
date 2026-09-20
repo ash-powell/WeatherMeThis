@@ -12,8 +12,6 @@ import { ReportLayoutState } from '../../state/report-layout-state';
   styleUrl: './report-charts.scss',
 })
 export class ReportCharts {
-  readonly collapsibleComments = input(true);
-  readonly expandedComments = signal<Set<ChartInput>>(new Set());
   readonly collapsedCharts = signal<Set<ChartInput>>(new Set());
 
   private readonly reportLayoutState = inject(ReportLayoutState);
@@ -25,15 +23,6 @@ export class ReportCharts {
 
   toggleControls(chartId: number): void{
     this.reportLayoutState.toggleControls(chartId);
-  }
-
-  toggleComments(chart: ChartInput): void {
-    this.expandedComments.update((current) => {
-      const next = new Set(current);
-      if (next.has(chart)) next.delete(chart);
-      else next.add(chart);
-      return next;
-    });
   }
 
   toggleChart(chart: ChartInput): void {

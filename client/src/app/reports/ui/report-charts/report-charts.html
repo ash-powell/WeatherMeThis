@@ -3,7 +3,7 @@
     <section class="report-chart" [attr.aria-labelledby]="'report-chart-title-' + chart.chartId">
       <div class="chart-heading">
         <h2 [id]="'report-chart-title-' + chart.chartId">
-          {{ chart.name || 'Chart ' + (chartIndex + 1) }}
+          {{ chart.name || 'Chart' }}
         </h2>
 
         <div class="chart-heading-actions">
@@ -40,22 +40,11 @@
           <p
             class="chart-comments"
             [id]="'chart-comments-' + chart.chartId"
-            [class.comments-reduced]="collapsibleComments() && !expandedComments().has(chart)"
-            [class.comments-expanded]="collapsibleComments() && expandedComments().has(chart)"
+            tabindex="0"
+            title="Drag the lower-right corner to resize comments"
           >
             {{ chart.comments }}
           </p>
-          @if (collapsibleComments()) {
-            <button
-              type="button"
-              class="comments-toggle"
-              [attr.aria-controls]="'chart-comments-' + chart.chartId"
-              [attr.aria-expanded]="expandedComments().has(chart)"
-              (click)="toggleComments(chart)"
-            >
-              {{ expandedComments().has(chart) ? 'Reduce comments' : 'Expand comments' }}
-            </button>
-          }
         }
 
         <app-weather-chart [graphSeries]="chart.graphSeries" [chartType]="chart.chartType" />

@@ -1,0 +1,73 @@
+<div class="help-document-backdrop" (click)="closed.emit()">
+  <section
+    class="help-document-dialog"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="'help-document-title-' + documentType()"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="help-document-heading">
+      <h2 [id]="'help-document-title-' + documentType()">{{ title() }}</h2>
+
+      <button
+        type="button"
+        class="help-document-close"
+        [attr.aria-label]="'Close ' + title()"
+        (click)="closed.emit()"
+      >
+        &times;
+      </button>
+    </header>
+
+    <div class="help-document-search">
+      <label [for]="'help-search-' + documentType()">Search {{ title().toLowerCase() }}</label>
+      <input
+        [id]="'help-search-' + documentType()"
+        type="search"
+        autocomplete="off"
+        placeholder="Enter words to find a topic"
+        autofocus
+        [value]="searchText()"
+        (input)="updateSearch($event)"
+      />
+    </div>
+
+    <div class="help-document-content" aria-live="polite">
+      @if (displayedSections().length === 0) {
+        <p class="no-help-results">No help topics match that search.</p>
+      } @else if (documentType() === 'instructions') {
+        @for (section of displayedSections(); track section.title) {
+          <section class="instruction-section">
+            <h3>{{ section.title }}</h3>
+
+            @for (paragraph of section.paragraphs; track $index) {
+              <p [innerHTML] = "paragraph"></p>
+            }
+
+            @if (section.steps?.length) {
+              <ol>
+                @for (step of section.steps; track $index) {
+                  <li [innerHTML] = "step"></li>
+                }
+              </ol>
+            }
+          </section>
+        }
+      } @else {
+        <div class="faq-list">
+          @for (section of displayedSections(); track section.title) {
+            <details class="faq-item" [open]="searchText().trim().length > 0">
+              <summary>{{ section.title }}</summary>
+
+              <div class="faq-answer">
+                @for (paragraph of section.paragraphs; track $index) {
+                  <p [innerHTML] = "paragraph"></p>
+                }
+              </div>
+            </details>
+          }
+        </div>
+      }
+    </div>
+  </section>
+</div>

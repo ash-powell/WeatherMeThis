@@ -3,7 +3,7 @@ import { ReportCharts } from './report-charts';
 import { ReportEditorStore } from '../../state/report-editor-store';
 
 describe('Gallery chart comments', () => {
-  it('starts reduced, toggles, and reduces comments on a newly loaded chart', async () => {
+  it('shows comments in a resizable scrolling region without a separate toggle', async () => {
     await TestBed.configureTestingModule({ imports: [ReportCharts] }).compileComponents();
     const fixture = TestBed.createComponent(ReportCharts);
     const chart = {
@@ -11,19 +11,13 @@ describe('Gallery chart comments', () => {
       comments: 'First line\nSecond line\nThird line',
     };
     fixture.componentRef.setInput('charts', [chart]);
-    fixture.componentRef.setInput('collapsibleComments', true);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.comments-reduced')).toBeTruthy();
-    fixture.nativeElement.querySelector('.comments-toggle').click();
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.comments-expanded')).toBeTruthy();
-    fixture.nativeElement.querySelector('.comments-toggle').click();
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.comments-reduced')).toBeTruthy();
-    fixture.componentInstance.toggleComments(chart);
-    fixture.componentRef.setInput('charts', [{ ...chart, comments: 'Another story' }]);
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.comments-reduced')).toBeTruthy();
+
+    const comments = fixture.nativeElement.querySelector('.chart-comments') as HTMLElement;
+    expect(comments.textContent).toContain('First line');
+    expect(comments.getAttribute('title')).toContain('resize comments');
+    expect(comments.getAttribute('tabindex')).toBe('0');
+    expect(fixture.nativeElement.querySelector('.comments-toggle')).toBeNull();
     fixture.destroy();
   });
 
