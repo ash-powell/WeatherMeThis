@@ -152,9 +152,9 @@ const INSTRUCTION_SECTIONS: readonly HelpSection[] = [
     paragraphs: [
       'A story is the complete collection of charts. Enter a Story name before saving or sharing.',
       'Log in and open My Stories. Save Story creates a new saved story. Save Changes updates the story currently loaded. My Saved Stories opens a searchable list from which you can load a story.',
-      'Opening a public gallery story or the Tutorial in the editor creates an editable copy; it does not let you overwrite the original public story.',
+      'Opening a public gallery story in the editor creates an editable copy; it does not let you overwrite the original public story.',
     ],
-    keywords: ['report login saved load update copy tutorial'],
+    keywords: ['report login saved load update copy '],
   },
   {
     title: 'Publish and share a story',
@@ -165,10 +165,10 @@ const INSTRUCTION_SECTIONS: readonly HelpSection[] = [
     keywords: ['gallery public private link unpublish remove delete'],
   },
   {
-    title: 'Use the Public Gallery and Tutorial',
+    title: 'Use the Public Gallery',
     paragraphs: [
       'Public Gallery lets you browse stories that users have published. A public story can be viewed without changing its original data.',
-      'Help → Tutorial loads the featured tutorial story directly into the editor as an unsaved copy so you can inspect its settings and experiment safely.',
+      // 'Help → Tutorial loads the featured tutorial story directly into the editor as an unsaved copy so you can inspect its settings and experiment safely.',
     ],
     keywords: ['browse featured example'],
   },
@@ -268,7 +268,7 @@ const FAQ_SECTIONS: readonly HelpSection[] = [
     keywords: ['account auth sign up'],
   },
   {
-    title: 'Does opening the Tutorial or a public story change the original?',
+    title: 'Does opening a public story change the original?',
     paragraphs: [
       'No. It opens as an unsaved editor copy. You can change its settings freely. If you are logged in, Save Story creates a separate story under your account.',
     ],
@@ -294,12 +294,5 @@ const FAQ_SECTIONS: readonly HelpSection[] = [
       'A required setting may be missing or invalid, the request may be too large, the network may be unavailable, or Open-Meteo may be temporarily unavailable or rate-limiting requests. Read the displayed message, correct any form problem, and try again.',
     ],
     keywords: ['error timeout 429 validation provider'],
-  },
-  {
-    title: 'Can I search these help pages?',
-    paragraphs: [
-      'Yes. Enter one or more words in the Search field. A section remains visible only when it contains every search word. Clear the field to show the complete document again.',
-    ],
-    keywords: ['filter instructions faq'],
   },
 ];

@@ -8,12 +8,12 @@
       <div class="chart-toolbar" [class.mobile-before-data]="!hasDisplayedChart()">
         <div class="chart-name-control">
           <label for="report-name">
-            Loaded story:
+            Loaded saved story:
             <strong
               class="loaded-story-name"
-              [title]="loadedStoryName() ?? 'no story currently loaded'"
+              [title]="loadedStoryName() ?? 'no saved story loaded'"
             >
-              {{ loadedStoryName() ?? 'no story currently loaded' }}
+              {{ loadedStoryName() ?? 'no saved story loaded' }}
             </strong>
           </label>
           <input
