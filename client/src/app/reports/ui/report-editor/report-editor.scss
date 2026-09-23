@@ -237,7 +237,11 @@
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, .9fr)) minmax(0, .3fr) minmax(0, .4fr);
+  grid-template-columns:
+    repeat(4, minmax(0, .5fr))
+    minmax(0, .5fr)
+    minmax(0, .5fr);
+    // minmax(0, .2fr);
   gap: 0.4rem 0.6rem;
 }
 
@@ -251,6 +255,52 @@
 .form-field--wide {
   grid-column: span 2;
 }
+
+.moving-average-container{
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 0.4rem 0.6rem;
+}
+
+.moving-average-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+
+  width: 100%;
+  min-width: 0;
+
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.moving-average-toggle input[type='checkbox'] {
+  width: 1.7rem;
+  height: 1.7rem;
+  min-height: 1rem;
+  padding: 0;
+  margin: 0;
+}
+
+.moving-average-label-button {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  padding-right: 30px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.moving-average-info-button {
+  position: absolute;
+  top: 10%;
+  right: 8%;
+  transform: translateY(-50%);
+}
+
+
 
 .form-field label {
   font-size: 0.75rem;
@@ -550,6 +600,14 @@
     display: grid;
     grid-template-columns: 1fr;
   }
+
+  .moving-average-info-button {
+    position: absolute;
+    top: 10%;
+    right: 30%;
+    transform: translateY(-50%);
+  }
+
 }
 
 @media (prefers-reduced-motion: reduce) {

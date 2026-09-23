@@ -59,6 +59,13 @@
               </p>
             }
 
+            @case ('avgMatchingDays') {
+              <p>
+                Average on Matching Days adds the values that pass the value
+                filter and divides the result by the number of matching days.
+              </p>
+            }
+
             @default {
               <p>Choose an aggregation to see more information about it.</p>
             }
@@ -93,6 +100,36 @@
           <p>
             This differs from Start Date and End Date, which determine the overall period of the
             analysis.
+          </p>
+        }
+
+        @case ('movingAverage') {
+          <h3 id="help-title">Moving Average</h3>
+
+          <p>
+            A moving average smooths short-term fluctuations so longer-term trends are
+            easier to see.
+          </p>
+
+          <p>
+            It can only be used when group-by is <strong>Exact date</strong>, <strong>Month of each year</strong>, and <strong>Year</strong>.
+          </p>
+
+          <p>
+            WeatherMeThis first calculates each chart point using the selected
+            aggregation and Group-by. It then averages consecutive chart points using
+            the selected window size.
+          </p>
+
+          <p>
+            Moving average applies only to the current series. Add matching series with
+            different window sizes—or leave one series unchanged—to compare them on the same chart.
+          </p>
+
+          <p>
+            For example, a three-year moving average calculates each result from three
+            consecutive yearly chart points. The first two points remain blank because
+            they do not yet have a complete three-year window.
           </p>
         }
       }

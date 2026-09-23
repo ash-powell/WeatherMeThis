@@ -398,7 +398,11 @@ export class App implements OnInit {
     const requests = [];
 
     for (const series of chart.seriesInputs) {
-      const analysis = this.buildAnalysisRequest(series, chart.groupBy, chart.metricUnits);
+      const analysis = this.buildAnalysisRequest(
+        series,
+        chart.groupBy,
+        chart.metricUnits,
+      );
 
       if (!analysis) {
         return;

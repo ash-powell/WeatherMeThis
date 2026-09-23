@@ -306,4 +306,60 @@ describe('Editor controls', () => {
 
     fixture.destroy();
   });
+
+  it('shows a default window input after Moving average is enabled', async () => {
+    const store = new ReportEditorStore();
+    const chart = store.report().charts[0];
+
+    store.updateChart(chart.chartId, (current) => ({
+      ...current,
+      groupBy: 'year',
+    }));
+
+    const facade = {
+      setMovingAverageWindow: (
+        chartId: number,
+        seriesId: number,
+        movingAverageWindow: number | null,
+      ) =>
+        store.updateSeries(chartId, seriesId, (current) => ({
+          ...current,
+          movingAverageWindow,
+        })),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [ReportEditor],
+      providers: [{ provide: ReportFacade, useValue: facade }],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(ReportEditor);
+    const refreshReport = (): void => {
+      fixture.componentRef.setInput('report', store.report());
+      fixture.detectChanges();
+    };
+
+    refreshReport();
+
+    const checkbox = fixture.nativeElement.querySelector(
+      '.moving-average-toggle input',
+    ) as HTMLInputElement;
+
+    expect(checkbox.checked).toBe(false);
+    expect(fixture.nativeElement.querySelector('.moving-average-window-field')).toBeNull();
+
+    checkbox.click();
+    refreshReport();
+    await fixture.whenStable();
+
+    const windowInput = fixture.nativeElement.querySelector(
+      '.moving-average-window-field input',
+    ) as HTMLInputElement;
+
+    expect(store.report().charts[0].seriesInputs[0].movingAverageWindow).toBe(3);
+    expect(windowInput).not.toBeNull();
+    expect(windowInput.valueAsNumber).toBe(3);
+
+    fixture.destroy();
+  });
 });

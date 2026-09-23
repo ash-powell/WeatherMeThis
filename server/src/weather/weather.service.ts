@@ -155,6 +155,7 @@ export async function analyzeWeatherRequest(request: AnalysisRequest): Promise<G
     aggregation: request.aggregation,
     avgFrequency: request.avgFrequency,
     groupBy: request.groupBy,
+    movingAverageWindow: request.movingAverageWindow,
     startDate: request.startDate,
     endDate: request.endDate,
     dateFilter: request.dateFilter,

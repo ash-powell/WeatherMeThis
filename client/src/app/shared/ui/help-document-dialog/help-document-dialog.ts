@@ -115,6 +115,41 @@ const INSTRUCTION_SECTIONS: readonly HelpSection[] = [
     keywords: ['aggregation measurement group group-by raw count sum min max average'],
   },
   {
+    title: 'Understanding how frequency, period(date range), and group-by affect averages',
+    paragraphs: [
+      'Suppose we ask: "What was the average daily rainfall for each month over the last 5 years?',
+      'In this case, set frequency to "Daily", group-by to "Month of each year", and the period(date range) to the last 5 years.',
+      'This would produce a chart with 60 data points- one for each month.',
+      'If instead, the group-by was "Calendar month name", the resulting chart would have 12 data points, and the January data point, for instance, would represent the average of all 5 January months.',
+      'The <strong>period</strong> is the complete Start date through End date range. An optional date filter can remove dates within that period before the average is calculated.',
+      '<strong>Group-by</strong> determines which dates contribute to each chart point. For example, grouping by year produces one average for each year, while grouping by month and year produces one average for each individual month.',
+      '<strong>Average frequency</strong> tells WeatherMeThis what kind of unit to average within each group: days, weeks, months, or years. The period supplies the dates, Group-by separates those dates into chart points, and Average frequency determines the denominator used inside each point.',
+      '<strong>Average number of days</strong> counts qualifying days, then reports the average count per selected frequency. Use it for questions such as, “On average, how many rainy days occurred per month?”',
+      '<strong>Average number of days</strong> aggregation used without a value filter and threshold will produce a trivial result: it will return the same result as the <strong>Number of Days</strong> aggregation, and that will do nothing more than count the number of days in your date range.',
+      '<strong>Average amount</strong> adds qualifying values, then reports the average total per selected frequency. Use it for questions such as, “What was the average monthly rainfall?” A value filter limits what enters the total, but the denominator still represents the complete selected frequency.',
+      '<strong>Average matching days</strong> adds only values that pass the value filter and divides by the number of matching days. Its frequency is always daily. Use it for questions such as, “Only on days when it rained, what was the average daily rainfall?” Nonmatching and missing values enter neither the numerator nor the denominator. If usable weather values exist but none match, the result is zero; if the provider supplied no usable values for the group, the chart has no value for that point.',
+    ],
+    keywords: [
+      'average averages frequency period date range group-by avgCnt avgSum avgMatchingDays matching denominator numerator',
+    ],
+  },
+  {
+    title: 'Use moving averages',
+    paragraphs: [
+      '<strong>Moving average</strong> smooths a chart so longer-term patterns are easier to see. WeatherMeThis first performs the aggregation and Group-by you selected, then averages consecutive chart points using the window size.',
+      'It can only be used with a group-by of <strong>Exact date</strong>, <strong>Month of each year</strong>, and <strong>Year</strong>.',
+      'Moving average is a <strong>series-level</strong> option. Each series can use no moving average or its own window size, so one chart can compare the original results with 3-point and 5-point moving averages.',
+      'Check the <strong>Moving average</strong> box in a series, then enter a whole-number window of at least 2. The window unit automatically matches Group-by: <strong>Year</strong> uses years, <strong>Month of each year</strong> uses months, and <strong>Exact date</strong> uses days.',
+      'For example, select a 20-year period, filter for summer months, use <strong>Average amount</strong> with a <strong>Monthly</strong> frequency, and Group-by <strong>Year</strong>. A 3-year moving average then shows the rolling average of each three consecutive yearly chart results.',
+      'The first few chart points will have no moving-average value because a complete window is not available yet. For instance, a chart with a 3-year moving average window begins at the third yearly point.',
+      'A missing chart value still occupies its chronological place in the window, but it is not included in the average. If every value in a complete window is missing, the result for that window is also missing.',
+      'The date filter must be finer-grained than the Group-by. For instance, <strong>Year</strong> can be used with no date filter or a month, month-and-day, or day filter. <strong>Month</strong> of each year can be used with no date filter or a day filter. <strong>Exact date</strong> cannot be used with a date filter. ',
+    ],
+    keywords: [
+      'moving rolling average smooth smoothing trend window years months days chronological date filter',
+    ],
+  },
+  {
     title: 'Filter values with a comparison and threshold',
     paragraphs: [
       'Choose No Filter to include every value. Otherwise select >=, <=, or =, and enter a threshold.',
@@ -205,9 +240,17 @@ const FAQ_SECTIONS: readonly HelpSection[] = [
     keywords: ['source provider archive'],
   },
   {
-    title: 'Why do I need to select Find Coordinates?',
+    title: 'Why doesn\'t this always match official records?',
     paragraphs: [
-      'Weather data is retrieved by latitude and longitude rather than by city name. Find Coordinates searches for matching places and fills those coordinates after you choose a result.',
+      'WeatherMeThis requests historical weather data from Open-Meteo which may combine weather models, reanalysis datasets, and observations for the selected coordinates rather than reproduce measurements from one official weather station.',
+      'Future updates will include optional data sets that include offical records. However, the official records are generally restricted to high and low daily temperatures and precipitation and only for US cities.',
+    ],
+    keywords: ['source provider archive'],
+  },
+  {
+    title: 'Why do I need to select Set Location?',
+    paragraphs: [
+      'Weather data is retrieved by latitude and longitude rather than by city name, so we need to find the coordinates of the city. This is what is going on behind the scenes when you click Set Location.',
     ],
     keywords: ['location airport geocoding'],
   },
@@ -222,6 +265,8 @@ const FAQ_SECTIONS: readonly HelpSection[] = [
     title: 'What is the difference between the date range and date filter?',
     paragraphs: [
       'The date range determines the full period retrieved. The optional date filter selects matching portions inside that period, such as summer months across ten years.',
+      'What was the minimum high temperature each summer for the last 20 years? IOW, what is the coolest you can expect a summer day to be?',
+      'What was the maximum low temperature each winter for the last 20 years? IOW, what is the warmest you can expect a winter day to be?',
     ],
     keywords: ['start end season from through'],
   },

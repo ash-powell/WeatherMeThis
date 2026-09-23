@@ -184,6 +184,31 @@ export class ReportEditor {
     this.reportFacade.setGroupBy(chartId, groupBy);
   }
 
+  movingAverageSupported(groupBy: GroupBy | null): boolean {
+    return groupBy === 'year' || groupBy === 'yearMonth' || groupBy === 'yearMonthDay';
+  }
+
+  movingAverageUnit(groupBy: GroupBy | null): string {
+    switch (groupBy) {
+      case 'year':
+        return 'years';
+      case 'yearMonth':
+        return 'months';
+      case 'yearMonthDay':
+        return 'days';
+      default:
+        return 'groups';
+    }
+  }
+
+  setMovingAverageEnabled(chartId: number, seriesId: number, enabled: boolean): void {
+    this.reportFacade.setMovingAverageWindow(chartId, seriesId, enabled ? 3 : null);
+  }
+
+  setMovingAverageWindow(chartId: number, seriesId: number, windowSize: number | null): void {
+    this.reportFacade.setMovingAverageWindow(chartId, seriesId, windowSize ?? 3);
+  }
+
   setSeriesExpanded(chartId: number, seriesId: number, event: Event): void {
     const details = event.currentTarget as HTMLDetailsElement;
 

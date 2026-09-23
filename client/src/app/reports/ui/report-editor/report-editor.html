@@ -244,6 +244,8 @@
                     <option value="avgCnt">Average number of days</option>
 
                     <option value="avgSum">Average amount</option>
+
+                    <option value="avgMatchingDays">Average matching days</option>
                   </select>
                 </div>
 
@@ -311,9 +313,13 @@
                   >
                     <option value="none">(No filter- include all values)</option>
 
+                    <option value=">">Greater than</option>
+
                     <option value=">=">Greater than or equal to</option>
 
-                    <option value="*<*=">Less than or equal to</option>
+                    <option value="<">Less than</option>
+
+                    <option value="<=">Less than or equal to</option>
 
                     <option value="=">Equal to</option>
                   </select>
@@ -340,22 +346,51 @@
                     />
                   </div>
                 }
-                @if (series.aggregation === 'avgSum' && series.comparison !== 'none'){
-                  <div class="form-field">
-                    <label [for]="'onlyAvgPassingDays-' + series.seriesId">
-                      Only count days that pass
+
+                <div class="moving-average-container">
+                  <div class="form-field moving-average-label-button">
+                    <label class="moving-average-toggle" >
+                      <span>Moving average</span>
+                      <input
+                        type="checkbox"
+                        [name]="'movingAverage-' + chart.chartId + '-' + series.seriesId"
+                        [disabled]="!movingAverageSupported(chart.groupBy)"
+                        [ngModel]="series.movingAverageWindow !== null"
+                        (ngModelChange)="
+                          setMovingAverageEnabled(chart.chartId, series.seriesId, $event)
+                        "
+                      />
                     </label>
-                    <input
-                      [id]="'onlyAvgPassingDays-' + series.seriesId"
-                      [name]="'onlyAvgPassingDays-' + series.seriesId"
-                      type="checkbox"
-                      /* [ngModel]="series.onlyAvgPassingDays" */
-                      /* (ngModelChange)=" */
-                        /* setSeriesField(chart.chartId, series.seriesId, 'onlyAvgPassingDays', $event) */
-                      /* " */
+
+                    <button
+                      type="button"
+                      class="info-button moving-average-info-button"
+                      aria-label="Explain aggregation"
+                      (click)="showHelp('movingAverage', series)"
                     >
+                      ⓘ
+                    </button>
                   </div>
-                }
+
+                  @if (series.movingAverageWindow !== null) {
+                    <div class="form-field moving-average-window-field">
+                      <label [for]="'moving-average-window-' + chart.chartId + '-' + series.seriesId">
+                        Window ({{ movingAverageUnit(chart.groupBy) }})
+                      </label>
+                      <input
+                        [id]="'moving-average-window-' + chart.chartId + '-' + series.seriesId"
+                        [name]="'movingAverageWindow-' + chart.chartId + '-' + series.seriesId"
+                        type="number"
+                        min="2"
+                        step="1"
+                        [ngModel]="series.movingAverageWindow"
+                        (ngModelChange)="
+                          setMovingAverageWindow(chart.chartId, series.seriesId, $event)
+                        "
+                      />
+                    </div>
+                  }
+                </div>
 
               </div>
 
@@ -403,10 +438,6 @@
                     <option value="all">Date Range (One big group) *Tip: use bar graph</option>
                   </select>
                 </div>
-
-
-
-
               </div>
             </section>
 

@@ -49,6 +49,7 @@ export class ReportEditorStore {
       avgFrequency: 'none',
       comparison: 'none',
       threshold: null,
+      movingAverageWindow: null,
       title: '',
     };
   }
@@ -302,13 +303,23 @@ export class ReportEditorStore {
   restoreDraft(report: ReportInput): void {
     const restoredReport: ReportInput = {
       ...report,
-      charts: report.charts.map((chart) => ({
-        ...chart,
-        chartType: chart.chartType ?? 'line',
-        pendingChartType: chart.pendingChartType ?? chart.chartType ?? 'line',
-        metricUnits: chart.metricUnits === true,
-        chartWideEdit: chart.chartWideEdit === true,
-      })),
+      charts: report.charts.map((chart) => {
+        const legacyWindow = (
+          chart as ChartInput & { movingAverageWindow?: number | null }
+        ).movingAverageWindow;
+
+        return {
+          ...chart,
+          chartType: chart.chartType ?? 'line',
+          pendingChartType: chart.pendingChartType ?? chart.chartType ?? 'line',
+          metricUnits: chart.metricUnits === true,
+          chartWideEdit: chart.chartWideEdit === true,
+          seriesInputs: chart.seriesInputs.map((series) => ({
+            ...series,
+            movingAverageWindow: series.movingAverageWindow ?? legacyWindow ?? null,
+          })),
+        };
+      }),
     };
 
     this.report.set(restoredReport);
@@ -321,6 +332,9 @@ export class ReportEditorStore {
 
   loadReportCopy(report: ReportRequest, renderedCharts: ChartInput[]): ChartInput[] {
     const charts: ChartInput[] = report.charts.map((savedChart, chartIndex) => {
+      const legacyWindow = (
+        savedChart as typeof savedChart & { movingAverageWindow?: number | null }
+      ).movingAverageWindow;
       const seriesInputs = savedChart.seriesArray.map((series) => ({
         seriesId: this.nextSeriesId++,
         expanded: false,
@@ -345,6 +359,7 @@ export class ReportEditorStore {
         avgFrequency: series.avgFrequency,
         comparison: series.comparison,
         threshold: series.threshold,
+        movingAverageWindow: series.movingAverageWindow ?? legacyWindow ?? null,
         title: series.title ?? '',
       }));
 

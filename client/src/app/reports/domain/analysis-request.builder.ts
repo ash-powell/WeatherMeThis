@@ -4,7 +4,23 @@ import type { AnalysisRequest, GroupBy } from '../../weather/models/analysis.mod
 
 import type { BuildResult } from './build-result';
 
-export function validateAnalysis(series: SeriesInput, groupBy: GroupBy | null): string | null {
+const movingAverageDateFilters: Partial<
+  Record<GroupBy, readonly SeriesInput['dateFilter']['unit'][]>
+> = {
+  year: ['none', 'month', 'monthDay', 'day'],
+  yearMonth: ['none', 'day'],
+  yearMonthDay: ['none'],
+};
+
+export function supportsMovingAverage(groupBy: GroupBy | null): boolean {
+  return groupBy !== null && movingAverageDateFilters[groupBy] !== undefined;
+}
+
+export function validateAnalysis(
+  series: SeriesInput,
+  groupBy: GroupBy | null,
+): string | null {
+  const movingAverageWindow = series.movingAverageWindow ?? null;
   if (
     !series.city ||
     !series.country ||
@@ -40,6 +56,29 @@ export function validateAnalysis(series: SeriesInput, groupBy: GroupBy | null): 
     return 'Average frequency required by average aggregations';
   }
 
+  if (series.aggregation === 'avgMatchingDays' && series.comparison === 'none') {
+    return 'Average Matching Days aggregation requires a value filter.';
+  }
+
+  if (
+    movingAverageWindow !== null &&
+    (!Number.isInteger(movingAverageWindow) || movingAverageWindow < 2)
+  ) {
+    return 'Moving average window must be a whole number of at least 2.';
+  }
+
+  if (movingAverageWindow !== null && groupBy) {
+    const permittedDateFilters = movingAverageDateFilters[groupBy];
+
+    if (!permittedDateFilters) {
+      return 'Moving averages require Group-by Year, Month of each year, or Exact date.';
+    }
+
+    if (!permittedDateFilters.includes(series.dateFilter.unit)) {
+      return 'The selected date filter is not finer-grained than the moving-average Group-by.';
+    }
+  }
+
   if (series.startDate > series.endDate) {
     return 'End date must be after or the same as start date.';
   }
@@ -52,6 +91,7 @@ export function buildAnalysisRequest(
   groupBy: GroupBy | null,
   metricUnits = false,
 ): BuildResult<AnalysisRequest> {
+  const movingAverageWindow = series.movingAverageWindow ?? null;
   const error = validateAnalysis(series, groupBy);
 
   if (error) {
@@ -61,13 +101,12 @@ export function buildAnalysisRequest(
     };
   }
 
-  const isAverage = series.aggregation === 'avgCnt' || series.aggregation === 'avgSum';
-
   return {
     ok: true,
 
     value: {
       metricUnits,
+      movingAverageWindow,
 
       location: {
         city: series.city!,
@@ -91,7 +130,12 @@ export function buildAnalysisRequest(
 
       aggregation: series.aggregation!,
 
-      avgFrequency: isAverage ? series.avgFrequency! : 'none',
+      avgFrequency:
+        series.aggregation === 'avgMatchingDays'
+          ? 'daily'
+          : series.aggregation === 'avgSum' || series.aggregation === 'avgCnt'
+            ? series.avgFrequency!
+            : 'none',
 
       groupBy: groupBy!,
     },

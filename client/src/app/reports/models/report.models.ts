@@ -29,6 +29,7 @@ export interface ReportSeries {
 
   aggregation: Aggregation;
   avgFrequency: AvgFrequency;
+  movingAverageWindow?: number | null;
 }
 
 export interface ReportChart {

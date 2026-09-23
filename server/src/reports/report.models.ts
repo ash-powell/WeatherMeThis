@@ -8,6 +8,7 @@ export interface ReportSearchFacet {
 
 export interface ReportSeries extends AnalysisSeries {
   title?: string;
+  movingAverageWindow: number | null;
 }
 
 export type ChartType = 'line' | 'bar';

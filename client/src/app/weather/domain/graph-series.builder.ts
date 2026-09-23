@@ -59,6 +59,10 @@ function getAggregationLabel(aggregation: Aggregation): string {
 
     case 'rawValues':
       return 'All days of';
+
+    case 'avgMatchingDays':
+      return 'Average on Matching Days';
+
   }
 }
 

@@ -18,9 +18,9 @@ export type Measurement =
 
 export type GroupBy = 'year' | 'month' | 'day' | 'yearMonth' | 'monthDay' | 'yearMonthDay' | 'all';
 
-export type Aggregation = 'count' | 'sum' | 'min' | 'max' | 'avgSum' | 'avgCnt' | 'rawValues';
+export type Aggregation = 'count' | 'sum' | 'min' | 'max' | 'avgSum' | 'avgCnt' | 'avgMatchingDays' | 'rawValues';
 
-export type Comparison = '>=' | '<=' | '=' | 'none';
+export type Comparison = '>' | '>=' | '<' | '<=' | '=' | 'none';
 
 export type AvgFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly' | 'none';
 
@@ -34,6 +34,7 @@ export interface DateFilter {
 
 export interface AnalysisRequest {
   metricUnits?: boolean;
+  movingAverageWindow: number | null;
 
   location: {
     city: string;

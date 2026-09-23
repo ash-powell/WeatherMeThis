@@ -143,6 +143,9 @@ export class GalleryFacade {
     let nextSeriesId = 1;
 
     const chartRequests = report.charts.map((chart, chartIndex) => {
+      const legacyWindow = (
+        chart as typeof chart & { movingAverageWindow?: number | null }
+      ).movingAverageWindow;
       const seriesRequests = chart.seriesArray.map((series) => {
         const seriesId = nextSeriesId++;
 
@@ -162,6 +165,7 @@ export class GalleryFacade {
           aggregation: series.aggregation,
           avgFrequency: series.avgFrequency,
           groupBy: chart.groupBy,
+          movingAverageWindow: series.movingAverageWindow ?? legacyWindow ?? null,
         };
 
         return this.weatherApi

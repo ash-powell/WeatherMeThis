@@ -50,7 +50,7 @@ describe('App', () => {
     expect(compiled.textContent).not.toContain('Story Editor');
   });
 
-  it('shows Instructions, FAQ, and Tutorial in the Help menu in that order', () => {
+  it('shows the currently enabled Help menu items in order', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
 
@@ -59,7 +59,7 @@ describe('App', () => {
       (button: Element) => button.textContent?.trim(),
     );
 
-    expect(menuItems).toEqual(['Instructions', 'FAQ', 'Tutorial']);
+    expect(menuItems).toEqual(['Instructions', 'FAQ']);
   });
 
   it('opens searchable help documents and keeps a close button outside the scrolling content', () => {

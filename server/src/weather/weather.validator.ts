@@ -40,10 +40,11 @@ const aggregations: readonly Aggregation[] = [
   'max',
   'avgSum',
   'avgCnt',
+  'avgMatchingDays',
   'rawValues',
 ];
 
-const comparisons: readonly Comparison[] = ['>=', '<=', '=', 'none'];
+const comparisons: readonly Comparison[] = ['>', '>=', '<', '<=', '=', 'none'];
 
 const averageFrequencies: readonly AvgFrequency[] = [
   'daily',
@@ -73,6 +74,28 @@ function isDateFilterUnit(value: unknown): value is DateFilterUnit {
 
 export function isGroupBy(value: unknown): value is GroupBy {
   return isOneOf(value, groupByOptions);
+}
+
+export function hasValidMovingAverageOptions(
+  movingAverageWindow: number | null,
+  groupBy: GroupBy,
+  dateFilterUnit: DateFilterUnit,
+): boolean {
+  if (movingAverageWindow === null) {
+    return true;
+  }
+
+  if (!Number.isInteger(movingAverageWindow) || movingAverageWindow < 2) {
+    return false;
+  }
+
+  const permittedDateFilters: Partial<Record<GroupBy, readonly DateFilterUnit[]>> = {
+    year: ['none', 'month', 'monthDay', 'day'],
+    yearMonth: ['none', 'day'],
+    yearMonthDay: ['none'],
+  };
+
+  return permittedDateFilters[groupBy]?.includes(dateFilterUnit) === true;
 }
 
 function isAggregation(value: unknown): value is Aggregation {
@@ -232,7 +255,10 @@ function hasValidOptionRelationships(
   comparison: Comparison,
   threshold: number | null,
 ): boolean {
-  const isAverage = aggregation === 'avgSum' || aggregation === 'avgCnt';
+  const isAverage =
+    aggregation === 'avgSum' ||
+    aggregation === 'avgCnt' ||
+    aggregation === 'avgMatchingDays';
 
   if (isAverage && avgFrequency === 'none') {
     return false;
@@ -241,6 +267,10 @@ function hasValidOptionRelationships(
   if (!isAverage && avgFrequency !== 'none') {
     return false;
   }
+
+  if (aggregation === 'avgMatchingDays' && avgFrequency !== 'daily') return false;
+
+  if (aggregation === 'avgMatchingDays' && comparison === 'none') return false;
 
   if (
     (aggregation === 'rawValues' && groupBy !== 'yearMonthDay') ||
@@ -322,9 +352,23 @@ export function validateAnalysisRequest(value: unknown): AnalysisRequest | null 
     return null;
   }
 
+  const movingAverageWindow = value.movingAverageWindow ?? null;
+
+  if (
+    movingAverageWindow !== null &&
+    (typeof movingAverageWindow !== 'number' || !Number.isFinite(movingAverageWindow))
+  ) {
+    return null;
+  }
+
+  if (!hasValidMovingAverageOptions(movingAverageWindow, groupBy, series.dateFilter.unit)) {
+    return null;
+  }
+
   return {
     metricUnits: value.metricUnits === true,
     ...series,
     groupBy,
+    movingAverageWindow,
   };
 }

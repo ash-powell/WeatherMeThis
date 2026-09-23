@@ -63,6 +63,7 @@ class WeatherAnalysis {
 
       avgSum: sum,
       avgCnt: count,
+      avgMatchingDays: sum,
 
       rawValues: (value, group) => {
         this.coordinates.set(group, value);
@@ -82,15 +83,28 @@ class WeatherAnalysis {
 
       const group = groupFunctions[this.options.groupBy](date);
 
-      if (!this.coordinates.has(group)) this.coordinates.set(group, null);
-      if (value === null) return;
-      if (this.coordinates.get(group) === null) this.initializeGroup(group);
+      if (!this.coordinates.has(group)) {
+        this.coordinates.set(group, null);
+      }
 
-      if (this.isAverageAggregation()) {
+      if (value === null) {
+        return;
+      }
+
+      if (this.coordinates.get(group) === null) {
+        this.initializeGroup(group);
+      }
+
+      const passesConstraint = this.meetsConstraint(value);
+
+      if (
+        this.isAverageAggregation() &&
+        (this.options.aggregation !== 'avgMatchingDays' || passesConstraint)
+      ) {
         this.updateFrequencyUnits(index, group);
       }
 
-      if (this.meetsConstraint(value)) {
+      if (passesConstraint) {
         this.aggregateValue(value, group);
       }
     });
@@ -99,7 +113,43 @@ class WeatherAnalysis {
       this.finalizeAverages();
     }
 
+    if (this.options.movingAverageWindow !== null) {
+      this.applyMovingAverage(this.options.movingAverageWindow);
+    }
+
     return this.coordinates;
+  }
+
+  private applyMovingAverage(windowSize: number): void {
+    const groupedValues = Array.from(this.coordinates.entries());
+    const window: Array<number | null> = [];
+    let windowTotal = 0;
+    let validValueCount = 0;
+
+    for (const [group, value] of groupedValues) {
+      window.push(value);
+
+      if (value !== null) {
+        windowTotal += value;
+        validValueCount++;
+      }
+
+      if (window.length > windowSize) {
+        const removedValue = window.shift();
+
+        if (removedValue !== undefined && removedValue !== null) {
+          windowTotal -= removedValue;
+          validValueCount--;
+        }
+      }
+
+      this.coordinates.set(
+        group,
+        window.length === windowSize && validValueCount > 0
+          ? windowTotal / validValueCount
+          : null,
+      );
+    }
   }
 
   private datePassesFilter(date: string): boolean {
@@ -127,16 +177,38 @@ class WeatherAnalysis {
   }
 
   private isAverageAggregation(): boolean {
-    return this.options.aggregation === 'avgCnt' || this.options.aggregation === 'avgSum';
+    return (
+      this.options.aggregation === 'avgCnt' ||
+      this.options.aggregation === 'avgSum' ||
+      this.options.aggregation === 'avgMatchingDays'
+    );
   }
 
   private finalizeAverages(): void {
     for (const group of this.coordinates.keys()) {
-      if (this.coordinates.get(group) === null) continue;
-      this.coordinates.set(
-        group,
-        this.coordinates.get(group)! / (this.frequencyUnits.get(group) || 1),
-      );
+      const total = this.coordinates.get(group)!;
+
+      // No usable Open-Meteo values existed for this group.
+      if (total === null) {
+        continue;
+      }
+
+      const frequencyUnits = this.frequencyUnits.get(group);
+
+      // Valid values existed, but none passed the Average on Matching Days value filter.
+      if (this.options.aggregation === 'avgMatchingDays' && !frequencyUnits) {
+        this.coordinates.set(group, 0);
+        continue;
+      }
+
+      // This should not normally happen for the other averages.
+      // Chart will show nothing, not even 0. Will appear as skipped point.
+      if (!frequencyUnits) {
+        this.coordinates.set(group, null);
+        continue;
+      }
+
+      this.coordinates.set(group, total / frequencyUnits);
     }
   }
 
@@ -155,7 +227,9 @@ class WeatherAnalysis {
       Exclude<Comparison, 'none'>,
       (first: number, second: number) => boolean
     > = {
+      '>': (first, second) => first > second,
       '>=': (first, second) => first >= second,
+      '<': (first, second) => first < second,
       '<=': (first, second) => first <= second,
       '=': (first, second) => first === second,
     };

@@ -42,7 +42,7 @@ export interface ReportInput {
   charts: ChartInput[];
 }
 
-export type HelpTopic = 'aggregation' | 'groupBy' | 'dateFilter' | 'comparison';
+export type HelpTopic = 'aggregation' | 'groupBy' | 'dateFilter' | 'comparison' | 'movingAverage';
 
 export interface SeriesInput {
   title?: string;
@@ -66,4 +66,5 @@ export interface SeriesInput {
   avgFrequency: AvgFrequency | null;
   comparison: Comparison | null;
   threshold: number | null;
+  movingAverageWindow: number | null;
 }

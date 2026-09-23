@@ -297,6 +297,24 @@ export class ReportFacade {
     this.reportEditorStore.updateChart(chartId, (chart) => ({
       ...chart,
       groupBy,
+      seriesInputs: chart.seriesInputs.map((series) => ({
+        ...series,
+        movingAverageWindow:
+          groupBy === 'year' || groupBy === 'yearMonth' || groupBy === 'yearMonthDay'
+            ? series.movingAverageWindow
+            : null,
+      })),
+    }));
+  }
+
+  setMovingAverageWindow(
+    chartId: number,
+    seriesId: number,
+    movingAverageWindow: number | null,
+  ): void {
+    this.reportEditorStore.updateSeries(chartId, seriesId, (series) => ({
+      ...series,
+      movingAverageWindow,
     }));
   }
 

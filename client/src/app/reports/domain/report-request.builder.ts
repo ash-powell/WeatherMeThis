@@ -52,7 +52,11 @@ export function buildReportRequest(report: ReportInput): BuildResult<ReportReque
     const seriesArray: ReportSeries[] = [];
 
     for (const series of chart.seriesInputs) {
-      const analysisResult = buildAnalysisRequest(series, chart.groupBy, chart.metricUnits);
+      const analysisResult = buildAnalysisRequest(
+        series,
+        chart.groupBy,
+        chart.metricUnits,
+      );
 
       if (!analysisResult.ok) {
         return analysisResult;
@@ -71,6 +75,7 @@ export function buildReportRequest(report: ReportInput): BuildResult<ReportReque
         threshold: analysis.threshold,
         aggregation: analysis.aggregation,
         avgFrequency: analysis.avgFrequency,
+        movingAverageWindow: analysis.movingAverageWindow,
       });
     }
 

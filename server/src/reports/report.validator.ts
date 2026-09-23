@@ -1,6 +1,10 @@
 import type { ChartType, ReportChart, ReportRequest, ReportSeries } from './report.models.js';
 
-import { isGroupBy, validateAnalysisSeries } from '../weather/weather.validator.js';
+import {
+  hasValidMovingAverageOptions,
+  isGroupBy,
+  validateAnalysisSeries,
+} from '../weather/weather.validator.js';
 
 function readChartType(value: unknown): ChartType | null {
   if (value === undefined) {
@@ -45,6 +49,15 @@ export function validateReportRequest(value: unknown): ReportRequest | null {
 
     const groupBy = chartValue.groupBy;
     const chartType = readChartType(chartValue.chartType);
+    const legacyMovingAverageWindow = chartValue.movingAverageWindow ?? null;
+
+    if (
+      legacyMovingAverageWindow !== null &&
+      (typeof legacyMovingAverageWindow !== 'number' ||
+        !Number.isFinite(legacyMovingAverageWindow))
+    ) {
+      return null;
+    }
 
     if (
       !chartType ||
@@ -62,20 +75,40 @@ export function validateReportRequest(value: unknown): ReportRequest | null {
     for (const seriesValue of chartValue.seriesArray) {
       const series = validateAnalysisSeries(seriesValue, groupBy);
 
-      if (!series) {
+      if (!series || !isRecord(seriesValue)) {
+        return null;
+      }
+
+      const movingAverageWindow =
+        seriesValue.movingAverageWindow ?? legacyMovingAverageWindow ?? null;
+
+      if (
+        movingAverageWindow !== null &&
+        (typeof movingAverageWindow !== 'number' || !Number.isFinite(movingAverageWindow))
+      ) {
         return null;
       }
 
       if (
-        !isRecord(seriesValue) ||
-        (seriesValue.title !== undefined &&
-          (typeof seriesValue.title !== 'string' || seriesValue.title.length > 100))
+        !hasValidMovingAverageOptions(
+          movingAverageWindow,
+          groupBy,
+          series.dateFilter.unit,
+        )
+      ) {
+        return null;
+      }
+
+      if (
+        seriesValue.title !== undefined &&
+        (typeof seriesValue.title !== 'string' || seriesValue.title.length > 100)
       ) {
         return null;
       }
       seriesArray.push({
         ...series,
         title: typeof seriesValue.title === 'string' ? seriesValue.title.trim() : '',
+        movingAverageWindow,
       });
     }
 
