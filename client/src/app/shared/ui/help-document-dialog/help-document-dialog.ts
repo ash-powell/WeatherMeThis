@@ -96,34 +96,34 @@ const INSTRUCTION_SECTIONS: readonly HelpSection[] = [
     keywords: ['from through season month day year'],
   },
   {
-    title: 'Aggregation and Group-by',
+    title: 'Aggregation and Date Groups',
     paragraphs: [
       'Aggregate is just a fancy word for "tell me ONE thing about this GROUP of data points."',
       'e.g. what is the <strong>max</strong> value of all these data points, what is the <strong>average</strong>, or <strong>count</strong> how many days are in this group, etc.',
       '<br><strong>See the FAQ if you need help with averages</strong>',
-      '<br>Group-by chooses how to divide your dates into groups. Then the aggregation will return a single value for each group',
-      'e.g. For the total rainfall each month last year, the group-by would be month, and the aggregation would be sum.',
+      '<br>Date Groups chooses how to divide your dates into groups. Then the aggregation will return a single value for each group',
+      'e.g. For the total rainfall each month last year, Date Groups would be Month of each year, and the aggregation would be Sum.',
       '<br>Measurement chooses the weather variable.',
       `
       <br>Notes:
       <ol>
-          <li>"Non-aggregated values" aggregation must be used with "Exact date" group-by</li>
+          <li>"Non-aggregated values" aggregation must be used with "Exact date" Date Groups</li>
           <li>"Number of Days" aggregation should always be used with a filter, or it trivially just counts the days in the date range.</li>
       </ol>
-      `
+      `,
     ],
     keywords: ['aggregation measurement group group-by raw count sum min max average'],
   },
   {
-    title: 'Understanding how frequency, period(date range), and group-by affect averages',
+    title: 'Understanding how frequency, period(date range), and Date Groups affect averages',
     paragraphs: [
       'Suppose we ask: "What was the average daily rainfall for each month over the last 5 years?',
-      'In this case, set frequency to "Daily", group-by to "Month of each year", and the period(date range) to the last 5 years.',
+      'In this case, set frequency to "Daily", Date Groups to "Month of each year", and the period(date range) to the last 5 years.',
       'This would produce a chart with 60 data points- one for each month.',
-      'If instead, the group-by was "Calendar month name", the resulting chart would have 12 data points, and the January data point, for instance, would represent the average of all 5 January months.',
+      'If instead, Date Groups was "Calendar month name", the resulting chart would have 12 data points, and the January data point, for instance, would represent the average of all 5 January months.',
       'The <strong>period</strong> is the complete Start date through End date range. An optional date filter can remove dates within that period before the average is calculated.',
-      '<strong>Group-by</strong> determines which dates contribute to each chart point. For example, grouping by year produces one average for each year, while grouping by month and year produces one average for each individual month.',
-      '<strong>Average frequency</strong> tells WeatherMeThis what kind of unit to average within each group: days, weeks, months, or years. The period supplies the dates, Group-by separates those dates into chart points, and Average frequency determines the denominator used inside each point.',
+      '<strong>Date Groups</strong> determines which dates contribute to each chart point. For example, Year produces one average for each year, while Month of each year produces one average for each individual month.',
+      '<strong>Average frequency</strong> tells WeatherMeThis what kind of unit to average within each group: days, weeks, months, or years. The period supplies the dates, Date Groups separates those dates into chart points, and Average frequency determines the denominator used inside each point.',
       '<strong>Average number of days</strong> counts qualifying days, then reports the average count per selected frequency. Use it for questions such as, “On average, how many rainy days occurred per month?”',
       '<strong>Average number of days</strong> aggregation used without a value filter and threshold will produce a trivial result: it will return the same result as the <strong>Number of Days</strong> aggregation, and that will do nothing more than count the number of days in your date range.',
       '<strong>Average amount</strong> adds qualifying values, then reports the average total per selected frequency. Use it for questions such as, “What was the average monthly rainfall?” A value filter limits what enters the total, but the denominator still represents the complete selected frequency.',
@@ -136,14 +136,14 @@ const INSTRUCTION_SECTIONS: readonly HelpSection[] = [
   {
     title: 'Use moving averages',
     paragraphs: [
-      '<strong>Moving average</strong> smooths a chart so longer-term patterns are easier to see. WeatherMeThis first performs the aggregation and Group-by you selected, then averages consecutive chart points using the window size.',
-      'It can only be used with a group-by of <strong>Exact date</strong>, <strong>Month of each year</strong>, and <strong>Year</strong>.',
+      '<strong>Moving average</strong> smooths a chart so longer-term patterns are easier to see. WeatherMeThis first performs the aggregation and Date Groups you selected, then averages consecutive chart points using the window size.',
+      '<span class="warning-text">It can only be used when Date Groups is <strong>Exact date</strong>, <strong>Month of each year</strong>, or <strong>Year</strong>.</span>',
       'Moving average is a <strong>series-level</strong> option. Each series can use no moving average or its own window size, so one chart can compare the original results with 3-point and 5-point moving averages.',
-      'Check the <strong>Moving average</strong> box in a series, then enter a whole-number window of at least 2. The window unit automatically matches Group-by: <strong>Year</strong> uses years, <strong>Month of each year</strong> uses months, and <strong>Exact date</strong> uses days.',
-      'For example, select a 20-year period, filter for summer months, use <strong>Average amount</strong> with a <strong>Monthly</strong> frequency, and Group-by <strong>Year</strong>. A 3-year moving average then shows the rolling average of each three consecutive yearly chart results.',
+      'Check the <strong>Moving average</strong> box in a series, then enter a whole-number window of at least 2. The window unit automatically matches Date Groups: <strong>Year</strong> uses years, <strong>Month of each year</strong> uses months, and <strong>Exact date</strong> uses days.',
+      'For example, select a 20-year period, filter for summer months, use <strong>Average amount</strong> with a <strong>Monthly</strong> frequency, and set Date Groups to <strong>Year</strong>. A 3-year moving average then shows the rolling average of each three consecutive yearly chart results.',
       'The first few chart points will have no moving-average value because a complete window is not available yet. For instance, a chart with a 3-year moving average window begins at the third yearly point.',
       'A missing chart value still occupies its chronological place in the window, but it is not included in the average. If every value in a complete window is missing, the result for that window is also missing.',
-      'The date filter must be finer-grained than the Group-by. For instance, <strong>Year</strong> can be used with no date filter or a month, month-and-day, or day filter. <strong>Month</strong> of each year can be used with no date filter or a day filter. <strong>Exact date</strong> cannot be used with a date filter. ',
+      'The date filter must be finer-grained than Date Groups. For instance, <strong>Year</strong> can be used with no date filter or a month, month-and-day, or day filter. <strong>Month</strong> of each year can be used with no date filter or a day filter. <strong>Exact date</strong> cannot be used with a date filter. ',
     ],
     keywords: [
       'moving rolling average smooth smoothing trend window years months days chronological date filter',
@@ -240,7 +240,7 @@ const FAQ_SECTIONS: readonly HelpSection[] = [
     keywords: ['source provider archive'],
   },
   {
-    title: 'Why doesn\'t this always match official records?',
+    title: "Why doesn't this always match official records?",
     paragraphs: [
       'WeatherMeThis requests historical weather data from Open-Meteo which may combine weather models, reanalysis datasets, and observations for the selected coordinates rather than reproduce measurements from one official weather station.',
       'Future updates will include optional data sets that include offical records. However, the official records are generally restricted to high and low daily temperatures and precipitation and only for US cities.',

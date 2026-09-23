@@ -19,7 +19,7 @@ import type { ChartType } from '../../../weather/models/chart.models';
 
 import type { QueryLocation } from '../../../locations/models/location.models';
 
-import type { GroupBy } from '../../../weather/models/analysis.models';
+import type { Aggregation, GroupBy } from '../../../weather/models/analysis.models';
 
 import { ReportCharts } from '../report-charts/report-charts';
 
@@ -77,9 +77,7 @@ export class ReportEditor {
   readonly weatherDataRequested = output<ChartDataRequest>();
 
   chartHasExpandedForms(chartId: number): boolean {
-    const chart = this.report().charts.find(
-      (currentChart) => currentChart.chartId === chartId,
-    );
+    const chart = this.report().charts.find((currentChart) => currentChart.chartId === chartId);
 
     return chart?.seriesInputs.some((series) => series.expanded) ?? false;
   }
@@ -115,7 +113,16 @@ export class ReportEditor {
     this.reportFacade.setPendingChartType(chartId, enabled ? 'bar' : 'line');
   }
 
-  addChart(afterChartId: number): void {this.reportFacade.addChart(afterChartId);
+  addChart(afterChartId: number): void {
+    const addedChartId = this.reportFacade.addChart(afterChartId);
+
+    if (addedChartId === null) return;
+
+    setTimeout(() => {
+      document
+        .getElementById(`chart-editor-${addedChartId}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }
 
   async deleteInputChart(chartId: number): Promise<void> {
@@ -145,7 +152,24 @@ export class ReportEditor {
   }
 
   addSeries(chartId: number, sourceSeriesId: number): void {
-    this.reportFacade.addSeries(chartId, sourceSeriesId, this.autopopulate());
+    const addedSeriesId = this.reportFacade.addSeries(
+      chartId,
+      sourceSeriesId,
+      this.autopopulate(),
+    );
+
+    if (addedSeriesId === null) {
+      return;
+    }
+
+    setTimeout(() => {
+      document
+        .getElementById(`series-editor-${addedSeriesId}`)
+        ?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+    });
   }
 
   setChartWideEdit(chartId: number, enabled: boolean): void {
@@ -163,6 +187,10 @@ export class ReportEditor {
     value: SeriesInput[K],
   ): void {
     this.reportFacade.setSharedSeriesField(chartId, seriesId, field, value);
+  }
+
+  setAggregation(chartId: number, seriesId: number, aggregation: Aggregation | null): void {
+    this.reportFacade.setAggregation(chartId, seriesId, aggregation);
   }
 
   setDateFilterField<K extends DateFilterField>(

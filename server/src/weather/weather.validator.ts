@@ -1,4 +1,4 @@
-import { measurementNames } from './measurement.models.js';
+import { measurementNames } from "./measurement.models.js";
 import type {
   Aggregation,
   AnalysisLocation,
@@ -10,57 +10,61 @@ import type {
   DateFilterUnit,
   GroupBy,
   Measurement,
-} from './weather.models.js';
+} from "./weather.models.js";
 
 const measurements: readonly Measurement[] = measurementNames;
 
 const dateFilterUnits: readonly DateFilterUnit[] = [
-  'day',
-  'monthDay',
-  'month',
-  'yearMonth',
-  'year',
-  'none',
+  "day",
+  "monthDay",
+  "month",
+  "yearMonth",
+  "year",
+  "none",
 ];
 
 const groupByOptions: readonly GroupBy[] = [
-  'year',
-  'month',
-  'day',
-  'yearMonth',
-  'monthDay',
-  'yearMonthDay',
-  'all',
+  "year",
+  "month",
+  "day",
+  "yearMonth",
+  "monthDay",
+  "yearMonthDay",
+  "all",
 ];
 
 const aggregations: readonly Aggregation[] = [
-  'count',
-  'sum',
-  'min',
-  'max',
-  'avgSum',
-  'avgCnt',
-  'avgMatchingDays',
-  'rawValues',
+  "count",
+  "sum",
+  "min",
+  "max",
+  "avgSum",
+  "avgCnt",
+  "avgMatchingDays",
+  "rawValues",
 ];
 
-const comparisons: readonly Comparison[] = ['>', '>=', '<', '<=', '=', 'none'];
+const comparisons: readonly Comparison[] = [">", ">=", "<", "<=", "=", "none"];
 
 const averageFrequencies: readonly AvgFrequency[] = [
-  'daily',
-  'weekly',
-  'monthly',
-  'yearly',
-  'none',
+  "daily",
+  "weekly",
+  "monthly",
+  "yearly",
+  "none",
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isOneOf<T extends string>(value: unknown, permittedValues: readonly T[]): value is T {
+function isOneOf<T extends string>(
+  value: unknown,
+  permittedValues: readonly T[],
+): value is T {
   return (
-    typeof value === 'string' && permittedValues.some((permittedValue) => permittedValue === value)
+    typeof value === "string" &&
+    permittedValues.some((permittedValue) => permittedValue === value)
   );
 }
 
@@ -89,10 +93,12 @@ export function hasValidMovingAverageOptions(
     return false;
   }
 
-  const permittedDateFilters: Partial<Record<GroupBy, readonly DateFilterUnit[]>> = {
-    year: ['none', 'month', 'monthDay', 'day'],
-    yearMonth: ['none', 'day'],
-    yearMonthDay: ['none'],
+  const permittedDateFilters: Partial<
+    Record<GroupBy, readonly DateFilterUnit[]>
+  > = {
+    year: ["none", "month", "monthDay", "day"],
+    yearMonth: ["none", "day"],
+    yearMonthDay: ["none"],
   };
 
   return permittedDateFilters[groupBy]?.includes(dateFilterUnit) === true;
@@ -115,23 +121,38 @@ function isLeapYear(year: number): boolean {
 }
 
 function getDaysInMonth(year: number, month: number): number {
-  const daysPerMonth = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  const daysPerMonth = [
+    31,
+    isLeapYear(year) ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ];
 
   return daysPerMonth[month - 1] ?? 0;
 }
 
 function isIsoDate(value: unknown): value is string {
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return false;
   }
 
-  const [yearString, monthString, dayString] = value.split('-');
+  const [yearString, monthString, dayString] = value.split("-");
 
   const year = Number(yearString);
   const month = Number(monthString);
   const day = Number(dayString);
 
-  return month >= 1 && month <= 12 && day >= 1 && day <= getDaysInMonth(year, month);
+  return (
+    month >= 1 && month <= 12 && day >= 1 && day <= getDaysInMonth(year, month)
+  );
 }
 
 function isValidMonth(value: string): boolean {
@@ -172,22 +193,22 @@ function isValidMonthDay(value: string): boolean {
 
 function isValidDateFilterValue(value: string, unit: DateFilterUnit): boolean {
   switch (unit) {
-    case 'day':
+    case "day":
       return isValidDay(value);
 
-    case 'month':
+    case "month":
       return isValidMonth(value);
 
-    case 'monthDay':
+    case "monthDay":
       return isValidMonthDay(value);
 
-    case 'year':
+    case "year":
       return isValidYear(value);
 
-    case 'yearMonth':
+    case "yearMonth":
       return isValidYearMonth(value);
 
-    case 'none':
+    case "none":
       return true;
   }
 }
@@ -199,11 +220,18 @@ function validateDateFilter(value: unknown): DateFilter | null {
 
   const { unit, min, max } = value;
 
-  if (!isDateFilterUnit(unit) || typeof min !== 'string' || typeof max !== 'string') {
+  if (
+    !isDateFilterUnit(unit) ||
+    typeof min !== "string" ||
+    typeof max !== "string"
+  ) {
     return null;
   }
 
-  if (!isValidDateFilterValue(min, unit) || !isValidDateFilterValue(max, unit)) {
+  if (
+    !isValidDateFilterValue(min, unit) ||
+    !isValidDateFilterValue(max, unit)
+  ) {
     return null;
   }
 
@@ -222,16 +250,16 @@ function validateLocation(value: unknown): AnalysisLocation | null {
   const { city, admin1, country, latitude, longitude } = value;
 
   if (
-    typeof city !== 'string' ||
-    city.trim() === '' ||
-    (admin1 !== null && typeof admin1 !== 'string') ||
-    typeof country !== 'string' ||
-    country.trim() === '' ||
-    typeof latitude !== 'number' ||
+    typeof city !== "string" ||
+    city.trim() === "" ||
+    (admin1 !== null && typeof admin1 !== "string") ||
+    typeof country !== "string" ||
+    country.trim() === "" ||
+    typeof latitude !== "number" ||
     !Number.isFinite(latitude) ||
     latitude < -90 ||
     latitude > 90 ||
-    typeof longitude !== 'number' ||
+    typeof longitude !== "number" ||
     !Number.isFinite(longitude) ||
     longitude < -180 ||
     longitude > 180
@@ -256,41 +284,45 @@ function hasValidOptionRelationships(
   threshold: number | null,
 ): boolean {
   const isAverage =
-    aggregation === 'avgSum' ||
-    aggregation === 'avgCnt' ||
-    aggregation === 'avgMatchingDays';
+    aggregation === "avgSum" ||
+    aggregation === "avgCnt" ||
+    aggregation === "avgMatchingDays";
 
-  if (isAverage && avgFrequency === 'none') {
+  if (isAverage && avgFrequency === "none") {
     return false;
   }
 
-  if (!isAverage && avgFrequency !== 'none') {
+  if (!isAverage && avgFrequency !== "none") {
     return false;
   }
 
-  if (aggregation === 'avgMatchingDays' && avgFrequency !== 'daily') return false;
+  if (aggregation === "avgMatchingDays" && avgFrequency !== "daily")
+    return false;
 
-  if (aggregation === 'avgMatchingDays' && comparison === 'none') return false;
+  if (aggregation === "avgMatchingDays" && comparison === "none") return false;
 
   if (
-    (aggregation === 'rawValues' && groupBy !== 'yearMonthDay') ||
-    (aggregation !== 'rawValues' && groupBy === 'yearMonthDay')
+    (aggregation === "rawValues" && groupBy !== "yearMonthDay") ||
+    (aggregation !== "rawValues" && groupBy === "yearMonthDay")
   ) {
     return false;
   }
 
-  if (comparison === 'none' && threshold !== null) {
+  if (comparison === "none" && threshold !== null) {
     return false;
   }
 
-  if (comparison !== 'none' && threshold === null) {
+  if (comparison !== "none" && threshold === null) {
     return false;
   }
 
   return true;
 }
 
-export function validateAnalysisSeries(value: unknown, groupBy: GroupBy): AnalysisSeries | null {
+export function validateAnalysisSeries(
+  value: unknown,
+  groupBy: GroupBy,
+): AnalysisSeries | null {
   if (!isRecord(value)) {
     return null;
   }
@@ -298,25 +330,42 @@ export function validateAnalysisSeries(value: unknown, groupBy: GroupBy): Analys
   const location = validateLocation(value.location);
   const dateFilter = validateDateFilter(value.dateFilter);
 
-  const { startDate, endDate, measurement, comparison, threshold, aggregation, avgFrequency } =
-    value;
+  const {
+    startDate,
+    endDate,
+    measurement,
+    comparison,
+    threshold,
+    aggregation,
+    avgFrequency,
+  } = value;
 
   if (
     !location ||
     !dateFilter ||
     !isIsoDate(startDate) ||
     !isIsoDate(endDate) ||
+    startDate < "1940-01-01" ||
     startDate > endDate ||
     !isMeasurement(measurement) ||
     !isComparison(comparison) ||
     !isAggregation(aggregation) ||
     !isAvgFrequency(avgFrequency) ||
-    (threshold !== null && (typeof threshold !== 'number' || !Number.isFinite(threshold)))
+    (threshold !== null &&
+      (typeof threshold !== "number" || !Number.isFinite(threshold)))
   ) {
     return null;
   }
 
-  if (!hasValidOptionRelationships(aggregation, avgFrequency, groupBy, comparison, threshold)) {
+  if (
+    !hasValidOptionRelationships(
+      aggregation,
+      avgFrequency,
+      groupBy,
+      comparison,
+      threshold,
+    )
+  ) {
     return null;
   }
 
@@ -333,7 +382,9 @@ export function validateAnalysisSeries(value: unknown, groupBy: GroupBy): Analys
   };
 }
 
-export function validateAnalysisRequest(value: unknown): AnalysisRequest | null {
+export function validateAnalysisRequest(
+  value: unknown,
+): AnalysisRequest | null {
   if (!isRecord(value)) {
     return null;
   }
@@ -344,7 +395,8 @@ export function validateAnalysisRequest(value: unknown): AnalysisRequest | null 
     return null;
   }
 
-  if (value.metricUnits !== undefined && typeof value.metricUnits !== 'boolean') return null;
+  if (value.metricUnits !== undefined && typeof value.metricUnits !== "boolean")
+    return null;
 
   const series = validateAnalysisSeries(value, groupBy);
 
@@ -356,12 +408,19 @@ export function validateAnalysisRequest(value: unknown): AnalysisRequest | null 
 
   if (
     movingAverageWindow !== null &&
-    (typeof movingAverageWindow !== 'number' || !Number.isFinite(movingAverageWindow))
+    (typeof movingAverageWindow !== "number" ||
+      !Number.isFinite(movingAverageWindow))
   ) {
     return null;
   }
 
-  if (!hasValidMovingAverageOptions(movingAverageWindow, groupBy, series.dateFilter.unit)) {
+  if (
+    !hasValidMovingAverageOptions(
+      movingAverageWindow,
+      groupBy,
+      series.dateFilter.unit,
+    )
+  ) {
     return null;
   }
 

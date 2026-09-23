@@ -2,12 +2,17 @@
   <!----------Iterate over charts to build all forms and print chart --------->
 
   @for (chart of report().charts; track chart.chartId; let chartIndex = $index) {
-    <section class="chart-editor" [hidden]="controlsHidden(chart.chartId)">
+    <section
+      class="chart-editor"
+      [id]="'chart-editor-' + chart.chartId"
+      [hidden]="controlsHidden(chart.chartId)"
+    >
       <!--------------- Iterate over series to build each form --------------->
 
       @for (series of chart.seriesInputs; track series.seriesId) {
         <details
           class="series-details"
+          [id]="'series-editor-' + series.seriesId"
           [open]="series.expanded"
           (toggle)="setSeriesExpanded(chart.chartId, series.seriesId, $event)"
         >
@@ -125,6 +130,7 @@
                     [id]="'start-date-' + series.seriesId"
                     [name]="'startDate-' + series.seriesId"
                     type="date"
+                    min="1940-01-01"
                     [ngModel]="series.startDate"
                     (ngModelChange)="
                       setSeriesField(chart.chartId, series.seriesId, 'startDate', $event)
@@ -225,9 +231,7 @@
                     [id]="'aggregation-' + series.seriesId"
                     [name]="'aggregation-' + series.seriesId"
                     [ngModel]="series.aggregation"
-                    (ngModelChange)="
-                      setSeriesField(chart.chartId, series.seriesId, 'aggregation', $event)
-                    "
+                    (ngModelChange)="setAggregation(chart.chartId, series.seriesId, $event)"
                   >
                     <option [ngValue]="null" disabled>Select aggregation</option>
 
@@ -277,9 +281,7 @@
                 }
 
                 <div class="form-field">
-                  <label [for]="'measurement-' + series.seriesId">
-                    of this measurement...
-                  </label>
+                  <label [for]="'measurement-' + series.seriesId"> of this measurement... </label>
 
                   <select
                     [id]="'measurement-' + series.seriesId"
@@ -301,7 +303,9 @@
                 </div>
 
                 <div class="form-field">
-                  <label [for]="'comparison-' + series.seriesId"> but only values that pass this filter </label>
+                  <label [for]="'comparison-' + series.seriesId">
+                    but only values that pass this filter
+                  </label>
 
                   <select
                     [id]="'comparison-' + series.seriesId"
@@ -349,7 +353,7 @@
 
                 <div class="moving-average-container">
                   <div class="form-field moving-average-label-button">
-                    <label class="moving-average-toggle" >
+                    <label class="moving-average-toggle">
                       <span>Moving average</span>
                       <input
                         type="checkbox"
@@ -374,7 +378,9 @@
 
                   @if (series.movingAverageWindow !== null) {
                     <div class="form-field moving-average-window-field">
-                      <label [for]="'moving-average-window-' + chart.chartId + '-' + series.seriesId">
+                      <label
+                        [for]="'moving-average-window-' + chart.chartId + '-' + series.seriesId"
+                      >
                         Window ({{ movingAverageUnit(chart.groupBy) }})
                       </label>
                       <input
@@ -391,7 +397,6 @@
                     </div>
                   }
                 </div>
-
               </div>
 
               @if (measurementNote(series.measurement)) {
@@ -401,14 +406,16 @@
               }
 
               @if (series.aggregation === 'rawValues') {
-                <p class="form-note">
-                  Non-aggregated values must be grouped by Exact date.
-                </p>
+                <p class="form-note">Non-aggregated values must be grouped by Exact date.</p>
+              }
+
+              @if (series.aggregation === 'count') {
+                <p class="form-note">Number of days should be used with a value filter</p>
               }
             </section>
 
             <section class="form-section">
-              <h3>Group-by</h3>
+              <h3>Date Groups</h3>
               <div class="form-grid">
                 <div class="form-field">
                   <label [for]="'group-by-' + series.seriesId">
@@ -421,7 +428,7 @@
                     [ngModel]="chart.groupBy"
                     (ngModelChange)="setGroupBy(chart.chartId, $event)"
                   >
-                    <option [ngValue]="null" disabled>Select group-by</option>
+                    <option [ngValue]="null" disabled>Select date groups</option>
 
                     <option value="yearMonthDay">Exact date (no groups- show every day)</option>
 
@@ -513,8 +520,6 @@
                 Chart-wide edit mode
               </label>
 
-
-
               <div class="series-title">
                 <label>Series Title</label>
                 <input
@@ -529,9 +534,6 @@
                   (ngModelChange)="setSeriesTitle(chart.chartId, series.seriesId, $event)"
                 />
               </div>
-
-
-
             </div>
 
             <p class="form-note" [id]="'unit-note-' + series.seriesId">

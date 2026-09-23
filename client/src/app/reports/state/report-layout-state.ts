@@ -4,14 +4,20 @@ import { Injectable, signal } from '@angular/core';
   providedIn: 'root',
 })
 export class ReportLayoutState {
-  private readonly hiddenControlsState = signal<ReadonlySet<number>>(
-    new Set<number>(),
-  );
+  private readonly hiddenControlsState = signal<ReadonlySet<number>>(new Set<number>());
 
   readonly hiddenControls = this.hiddenControlsState.asReadonly();
 
   controlsHidden(chartId: number): boolean {
     return this.hiddenControlsState().has(chartId);
+  }
+
+  hideControls(chartIds: readonly number[]): void {
+    this.hiddenControlsState.set(new Set(chartIds));
+  }
+
+  showAllControls(): void {
+    this.hiddenControlsState.set(new Set<number>());
   }
 
   toggleControls(chartId: number): void {

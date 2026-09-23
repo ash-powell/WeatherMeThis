@@ -9,9 +9,9 @@
     >
       @switch (topic()) {
         @case ('groupBy') {
-          <h3 id="help-title">Group dates by</h3>
+          <h3 id="help-title">Date Groups</h3>
 
-          <p>Group By determines how dates are combined into points on the chart.</p>
+          <p>Date Groups determines how dates are combined into points on the chart.</p>
 
           <p>
             For example, grouping by year produces one result for each year, while grouping by month
@@ -26,11 +26,14 @@
 
           @switch (series()?.aggregation) {
             @case ('rawValues') {
-              <p>Raw Values shows each daily value without combining multiple days.</p>
+              <p>
+                Non-aggregated values shows each daily raw value without combining multiple days.
+              </p>
+              <p>It can only be used with Date Group set to Exact date.</p>
             }
 
             @case ('count') {
-              <p>Count returns the number of values that meet the selected comparison.</p>
+              <p>Number of days counts the number of values that meet the selected comparison.</p>
             }
 
             @case ('sum') {
@@ -61,8 +64,8 @@
 
             @case ('avgMatchingDays') {
               <p>
-                Average on Matching Days adds the values that pass the value
-                filter and divides the result by the number of matching days.
+                Average on Matching Days adds the values that pass the value filter and divides the
+                result by the number of matching days.
               </p>
             }
 
@@ -107,29 +110,29 @@
           <h3 id="help-title">Moving Average</h3>
 
           <p>
-            A moving average smooths short-term fluctuations so longer-term trends are
-            easier to see.
+            A moving average smooths short-term fluctuations so longer-term trends are easier to
+            see.
+          </p>
+
+          <p style="color: red">
+            It can only be used when Date Groups is <strong>Exact date</strong>,
+            <strong>Month of each year</strong>, or <strong>Year</strong>.
           </p>
 
           <p>
-            It can only be used when group-by is <strong>Exact date</strong>, <strong>Month of each year</strong>, and <strong>Year</strong>.
+            WeatherMeThis first calculates each chart point using the selected aggregation and Date
+            Groups. It then averages consecutive chart points using the selected window size.
           </p>
 
           <p>
-            WeatherMeThis first calculates each chart point using the selected
-            aggregation and Group-by. It then averages consecutive chart points using
-            the selected window size.
+            Moving average applies only to the current series. Add matching series with different
+            window sizes—or leave one series unchanged—to compare them on the same chart.
           </p>
 
           <p>
-            Moving average applies only to the current series. Add matching series with
-            different window sizes—or leave one series unchanged—to compare them on the same chart.
-          </p>
-
-          <p>
-            For example, a three-year moving average calculates each result from three
-            consecutive yearly chart points. The first two points remain blank because
-            they do not yet have a complete three-year window.
+            For example, a three-year moving average calculates each result from three consecutive
+            yearly chart points. The first two points remain blank because they do not yet have a
+            complete three-year window.
           </p>
         }
       }

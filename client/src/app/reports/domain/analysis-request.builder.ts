@@ -16,10 +16,7 @@ export function supportsMovingAverage(groupBy: GroupBy | null): boolean {
   return groupBy !== null && movingAverageDateFilters[groupBy] !== undefined;
 }
 
-export function validateAnalysis(
-  series: SeriesInput,
-  groupBy: GroupBy | null,
-): string | null {
+export function validateAnalysis(series: SeriesInput, groupBy: GroupBy | null): string | null {
   const movingAverageWindow = series.movingAverageWindow ?? null;
   if (
     !series.city ||
@@ -39,6 +36,10 @@ export function validateAnalysis(
 
   if (series.comparison !== 'none' && series.threshold === null) {
     return `${series.comparison} filter requires a number threshold value`;
+  }
+
+  if (series.startDate < '1940-01-01') {
+    return 'Start date cannot be earlier than January 1, 1940.';
   }
 
   if (series.aggregation === 'rawValues' && groupBy !== 'yearMonthDay') {
@@ -71,11 +72,11 @@ export function validateAnalysis(
     const permittedDateFilters = movingAverageDateFilters[groupBy];
 
     if (!permittedDateFilters) {
-      return 'Moving averages require Group-by Year, Month of each year, or Exact date.';
+      return 'Moving averages require Date Groups Year, Month of each year, or Exact date.';
     }
 
     if (!permittedDateFilters.includes(series.dateFilter.unit)) {
-      return 'The selected date filter is not finer-grained than the moving-average Group-by.';
+      return 'The selected date filter is not finer-grained than the moving-average Date Groups.';
     }
   }
 

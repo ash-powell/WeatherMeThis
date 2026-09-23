@@ -134,16 +134,16 @@ export class ReportEditorStore {
     });
   }
 
-  addChart(afterChartId?: number): void {
+  addChart(afterChartId?: number): number | null {
+    let addedChartId: number | null = null;
+
     this.report.update((current) => {
       const sourceIndex =
         afterChartId === undefined
           ? current.charts.length - 1
-          : current.charts.findIndex(
-              (chart) => chart.chartId === afterChartId,
-            );
+          : current.charts.findIndex((chart) => chart.chartId === afterChartId);
 
-      if (sourceIndex < 0 && current.charts.length > 0) {return current;}
+      if (sourceIndex < 0 && current.charts.length > 0) return current;
 
       const sourceChart = current.charts[sourceIndex];
 
@@ -152,29 +152,35 @@ export class ReportEditorStore {
         metricUnits: sourceChart?.metricUnits ?? false,
       };
 
+      addedChartId = newChart.chartId;
+
       const charts = [...current.charts];
 
       charts.splice(sourceIndex + 1, 0, newChart);
 
-      return {...current, charts,};
+      return { ...current, charts };
     });
+
+    return addedChartId;
   }
 
-  addSeries(chartId: number, sourceSeriesId: number, autopopulate: boolean): void {
+  addSeries(chartId: number, sourceSeriesId: number, autopopulate: boolean,): number | null {
+    let addedSeriesId: number | null = null;
+
     this.updateChart(chartId, (chart) => {
       let newSeries: SeriesInput;
 
       if (autopopulate && chart.seriesInputs.length > 0) {
-        const source = chart.seriesInputs.find((series) => series.seriesId === sourceSeriesId);
+        const source = chart.seriesInputs.find(
+          (series) => series.seriesId === sourceSeriesId,
+        );
 
         newSeries = source
           ? {
               ...source,
               seriesId: this.nextSeriesId++,
               expanded: true,
-              dateFilter: {
-                ...source.dateFilter,
-              },
+              dateFilter: { ...source.dateFilter },
               locations: [],
             }
           : this.createSeriesInput();
@@ -182,12 +188,15 @@ export class ReportEditorStore {
         newSeries = this.createSeriesInput();
       }
 
+      addedSeriesId = newSeries.seriesId;
+
       return {
         ...chart,
-
         seriesInputs: [...chart.seriesInputs, newSeries],
       };
     });
+
+    return addedSeriesId;
   }
 
   setMetricUnits(metricUnits: boolean): void {
@@ -264,9 +273,7 @@ export class ReportEditorStore {
   }
 
   deleteChart(chartId: number): boolean {
-    const chartExists = this.report().charts.some(
-      (chart) => chart.chartId === chartId,
-    );
+    const chartExists = this.report().charts.some((chart) => chart.chartId === chartId);
 
     if (!chartExists) {
       return false;
@@ -282,9 +289,7 @@ export class ReportEditorStore {
 
       return {
         ...current,
-        charts: current.charts.filter(
-          (chart) => chart.chartId !== chartId,
-        ),
+        charts: current.charts.filter((chart) => chart.chartId !== chartId),
       };
     });
 
@@ -304,9 +309,8 @@ export class ReportEditorStore {
     const restoredReport: ReportInput = {
       ...report,
       charts: report.charts.map((chart) => {
-        const legacyWindow = (
-          chart as ChartInput & { movingAverageWindow?: number | null }
-        ).movingAverageWindow;
+        const legacyWindow = (chart as ChartInput & { movingAverageWindow?: number | null })
+          .movingAverageWindow;
 
         return {
           ...chart,

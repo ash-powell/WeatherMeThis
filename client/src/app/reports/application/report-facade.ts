@@ -6,7 +6,7 @@ import type { LocationResponse, QueryLocation } from '../../locations/models/loc
 
 import { WeatherApi } from '../../weather/data-access/weather-api';
 import { buildGraphSeries } from '../../weather/domain/graph-series.builder';
-import type { AnalysisRequest, GroupBy } from '../../weather/models/analysis.models';
+import type { Aggregation, AnalysisRequest, GroupBy } from '../../weather/models/analysis.models';
 import type { ChartType } from '../../weather/models/chart.models';
 import type { GraphPoint } from '../../weather/models/graph.models';
 
@@ -21,6 +21,7 @@ import type {
 } from '../models/report-editor.models';
 import type { ReportRequest, SavedReport } from '../models/report.models';
 import { ReportEditorStore } from '../state/report-editor-store';
+import { ReportLayoutState } from '../state/report-layout-state';
 
 import type { Observable } from 'rxjs';
 
@@ -31,6 +32,8 @@ export class ReportFacade {
   private readonly reportApi = inject(ReportApi);
 
   private readonly reportEditorStore = inject(ReportEditorStore);
+
+  private readonly reportLayoutState = inject(ReportLayoutState);
 
   private readonly locationApi = inject(LocationApi);
 
@@ -57,6 +60,7 @@ export class ReportFacade {
   selectReport(saved: SavedReport): ChartInput[] {
     this.latestWeatherRequest.clear();
     const charts = this.reportEditorStore.loadSavedReport(saved);
+    this.reportLayoutState.hideControls(charts.map((chart) => chart.chartId));
 
     this.reportIdState.set(saved._id);
     this.selectedReportIsPublicState.set(saved.isPublic === true);
@@ -69,6 +73,7 @@ export class ReportFacade {
   openReportCopy(report: ReportRequest, renderedCharts: ChartInput[]): ChartInput[] {
     this.latestWeatherRequest.clear();
     const charts = this.reportEditorStore.loadReportCopy(report, renderedCharts);
+    this.reportLayoutState.hideControls(charts.map((chart) => chart.chartId));
 
     this.reportIdState.set(null);
     this.selectedReportIsPublicState.set(false);
@@ -210,6 +215,7 @@ export class ReportFacade {
     this.selectedReportIsPublicState.set(false);
     this.loadedStoryNameState.set(null);
     this.savedReportsState.set([]);
+    this.reportLayoutState.showAllControls();
   }
 
   setSelectedReportPublication(isPublic: boolean): void {
@@ -251,13 +257,13 @@ export class ReportFacade {
     this.reportEditorStore.moveChart(chartId, direction);
   }
 
-  addChart(afterChartId?: number): void {
-    this.reportEditorStore.addChart(afterChartId);
+  addChart(afterChartId?: number): number | null {
+    return this.reportEditorStore.addChart(afterChartId);
   }
 
-  addSeries(chartId: number, sourceSeriesId: number, autopopulate: boolean): void {
-    this.reportEditorStore.addSeries(chartId, sourceSeriesId, autopopulate);
-  }
+addSeries(chartId: number, sourceSeriesId: number, autopopulate: boolean,): number | null {
+  return this.reportEditorStore.addSeries(chartId, sourceSeriesId, autopopulate,);
+}
 
   setChartWideEdit(chartId: number, enabled: boolean): void {
     this.reportEditorStore.setChartWideEdit(chartId, enabled);
@@ -274,6 +280,25 @@ export class ReportFacade {
     value: SeriesInput[K],
   ): void {
     this.reportEditorStore.setSharedSeriesField(chartId, seriesId, field, value);
+  }
+
+  setAggregation(chartId: number, seriesId: number, aggregation: Aggregation | null): void {
+    if (aggregation !== 'rawValues') {
+      this.reportEditorStore.setSharedSeriesField(chartId, seriesId, 'aggregation', aggregation);
+      return;
+    }
+
+    // Exact dates and raw values are a paired chart-wide rule. Because Date Groups
+    // is shared by every series in a chart, keep every series compatible with it.
+    this.reportEditorStore.updateChart(chartId, (chart) => ({
+      ...chart,
+      groupBy: 'yearMonthDay',
+      seriesInputs: chart.seriesInputs.map((series) => ({
+        ...series,
+        aggregation: 'rawValues',
+        avgFrequency: 'none',
+      })),
+    }));
   }
 
   setDateFilterField<K extends DateFilterField>(
@@ -297,8 +322,11 @@ export class ReportFacade {
     this.reportEditorStore.updateChart(chartId, (chart) => ({
       ...chart,
       groupBy,
+      pendingChartType: groupBy === 'all' ? 'bar' : chart.pendingChartType,
       seriesInputs: chart.seriesInputs.map((series) => ({
         ...series,
+        aggregation: groupBy === 'yearMonthDay' ? 'rawValues' : series.aggregation,
+        avgFrequency: groupBy === 'yearMonthDay' ? 'none' : series.avgFrequency,
         movingAverageWindow:
           groupBy === 'year' || groupBy === 'yearMonth' || groupBy === 'yearMonthDay'
             ? series.movingAverageWindow

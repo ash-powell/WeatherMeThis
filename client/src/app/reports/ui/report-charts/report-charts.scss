@@ -2,7 +2,7 @@
   display: block;
 }
 
-.report-chart{
+.report-chart {
   padding: 5px;
   border: 1px solid #cbd5e1;
   border-radius: 0.5rem;
@@ -46,6 +46,15 @@
 .chart-controls-toggle:focus-visible {
   outline: 2px solid #0b64d0;
   outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .chart-collapse-toggle:hover,
+  .chart-controls-toggle:hover {
+    color: #002d7a;
+    background: #eaf5ff;
+    border-color: #0b64d0;
+  }
 }
 
 .chart-separator {
