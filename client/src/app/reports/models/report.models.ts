@@ -32,6 +32,15 @@ export interface ReportSeries {
   movingAverageWindow?: number | null;
 }
 
+export interface ReportSeriesResult {
+  label: string;
+  yAxisId: string;
+  yAxisLabel: string;
+  requestKey?: string;
+  dates: string[];
+  values: Array<number | null>;
+}
+
 export interface ReportChart {
   metricUnits?: boolean;
   name: string | null;
@@ -39,6 +48,7 @@ export interface ReportChart {
   chartType: ChartType;
   groupBy: GroupBy;
   seriesArray: ReportSeries[];
+  renderedSeries?: Array<ReportSeriesResult | null>;
 }
 
 export interface ReportRequest {
@@ -48,6 +58,15 @@ export interface ReportRequest {
 
 export interface SavedReport extends ReportRequest {
   _id: string;
+  createdAt: string;
+  isPublic: boolean;
+  publishedAt: string | null;
+  likeCount: number;
+}
+
+export interface SavedReportSummary {
+  _id: string;
+  name: string;
   createdAt: string;
   isPublic: boolean;
   publishedAt: string | null;

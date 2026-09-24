@@ -134,7 +134,33 @@ export class ReportEditorStore {
     });
   }
 
-  addChart(afterChartId?: number): number | null {
+  moveSeries(chartId: number, seriesId: number, direction: -1 | 1): void {
+    this.updateChart(chartId, (chart) => {
+      const index = chart.seriesInputs.findIndex((series) => series.seriesId === seriesId);
+      const target = index + direction;
+
+      if (index < 0 || target < 0 || target >= chart.seriesInputs.length) {
+        return chart;
+      }
+
+      const seriesInputs = [...chart.seriesInputs];
+      [seriesInputs[index], seriesInputs[target]] = [seriesInputs[target], seriesInputs[index]];
+
+      const graphSeriesById = new Map(chart.graphSeries.map((series) => [series.seriesId, series]));
+      const graphSeries = seriesInputs.flatMap((series) => {
+        const rendered = graphSeriesById.get(series.seriesId);
+        return rendered ? [rendered] : [];
+      });
+
+      return {
+        ...chart,
+        seriesInputs,
+        graphSeries,
+      };
+    });
+  }
+
+  addChart(afterChartId?: number, autopopulate = false): number | null {
     let addedChartId: number | null = null;
 
     this.report.update((current) => {
@@ -147,10 +173,30 @@ export class ReportEditorStore {
 
       const sourceChart = current.charts[sourceIndex];
 
-      const newChart = {
-        ...this.createChartInput(),
-        metricUnits: sourceChart?.metricUnits ?? false,
-      };
+      const newChart =
+        autopopulate && sourceChart
+          ? {
+              chartId: this.nextChartId++,
+              name: '',
+              comments: '',
+              chartType: sourceChart.chartType,
+              pendingChartType: sourceChart.pendingChartType,
+              metricUnits: sourceChart.metricUnits,
+              groupBy: sourceChart.groupBy,
+              chartWideEdit: false,
+              seriesInputs: sourceChart.seriesInputs.map((series) => ({
+                ...series,
+                seriesId: this.nextSeriesId++,
+                expanded: true,
+                dateFilter: { ...series.dateFilter },
+                locations: [],
+              })),
+              graphSeries: [],
+            }
+          : {
+              ...this.createChartInput(),
+              metricUnits: sourceChart?.metricUnits ?? false,
+            };
 
       addedChartId = newChart.chartId;
 
@@ -164,16 +210,14 @@ export class ReportEditorStore {
     return addedChartId;
   }
 
-  addSeries(chartId: number, sourceSeriesId: number, autopopulate: boolean,): number | null {
+  addSeries(chartId: number, sourceSeriesId: number, autopopulate: boolean): number | null {
     let addedSeriesId: number | null = null;
 
     this.updateChart(chartId, (chart) => {
       let newSeries: SeriesInput;
 
       if (autopopulate && chart.seriesInputs.length > 0) {
-        const source = chart.seriesInputs.find(
-          (series) => series.seriesId === sourceSeriesId,
-        );
+        const source = chart.seriesInputs.find((series) => series.seriesId === sourceSeriesId);
 
         newSeries = source
           ? {
@@ -331,7 +375,7 @@ export class ReportEditorStore {
   }
 
   loadSavedReport(saved: SavedReport): ChartInput[] {
-    return this.loadReportCopy(saved, []);
+    return this.loadReportCopy(saved, this.renderedCharts(saved));
   }
 
   loadReportCopy(report: ReportRequest, renderedCharts: ChartInput[]): ChartInput[] {
@@ -368,9 +412,9 @@ export class ReportEditorStore {
       }));
 
       const graphSeries =
-        renderedCharts[chartIndex]?.graphSeries.map((series, seriesIndex) => ({
+        renderedCharts[chartIndex]?.graphSeries.map((series) => ({
           ...series,
-          seriesId: seriesInputs[seriesIndex]?.seriesId ?? series.seriesId,
+          seriesId: seriesInputs[series.seriesId - 1]?.seriesId ?? series.seriesId,
         })) ?? [];
 
       return {
@@ -393,6 +437,39 @@ export class ReportEditorStore {
     });
 
     return charts;
+  }
+
+  private renderedCharts(report: ReportRequest): ChartInput[] {
+    return report.charts.map((chart, chartIndex) => ({
+      chartId: chartIndex + 1,
+      name: chart.name ?? '',
+      comments: chart.comments,
+      chartType: chart.chartType ?? 'line',
+      pendingChartType: chart.chartType ?? 'line',
+      metricUnits: chart.metricUnits === true,
+      groupBy: chart.groupBy,
+      chartWideEdit: false,
+      seriesInputs: [],
+      graphSeries: (chart.renderedSeries ?? []).flatMap((result, seriesIndex) => {
+        if (!result) {
+          return [];
+        }
+
+        return [
+          {
+            seriesId: seriesIndex + 1,
+            label: result.label,
+            yAxisId: result.yAxisId,
+            yAxisLabel: result.yAxisLabel,
+            requestKey: result.requestKey,
+            points: result.dates.map((date, pointIndex) => ({
+              date,
+              value: result.values[pointIndex] ?? null,
+            })),
+          },
+        ];
+      }),
+    }));
   }
 
   private synchronizeNextIds(report: ReportInput): void {

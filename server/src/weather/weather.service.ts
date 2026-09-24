@@ -1,11 +1,19 @@
 import { convertFromMetric, MEASUREMENTS } from './measurement.models.js';
 import { analyzeWeather } from './domain/weather-analysis.js';
+import {
+  estimateOpenMeteoCallCost,
+  openMeteoConfirmationThreshold,
+  rawWeatherRequestKey,
+} from './open-meteo-cost.js';
+import { OpenMeteoRateLimiter } from './open-meteo-rate-limiter.js';
+import { RawWeatherCache } from './raw-weather-cache.js';
 
 import type {
   AnalysisOptions,
   AnalysisRequest,
   GraphPoint,
   WeatherData,
+  WeatherRequestPlan,
 } from './weather.models.js';
 
 export class WeatherUpstreamError extends Error {
@@ -28,11 +36,17 @@ const OPEN_METEO_UNAVAILABLE_MESSAGE =
 const OPEN_METEO_INVALID_RESPONSE_MESSAGE =
   'Open-Meteo returned an invalid response. Please try again shortly.';
 
+const rawWeatherCache = new RawWeatherCache();
+const openMeteoRateLimiter = new OpenMeteoRateLimiter();
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function normalizeWeatherData(value: unknown, measurement: string): WeatherData {
+function normalizeWeatherData(
+  value: unknown,
+  measurement: string,
+): WeatherData {
   if (!isRecord(value) || !isRecord(value.daily)) {
     throw new WeatherUpstreamError(
       502,
@@ -51,7 +65,8 @@ function normalizeWeatherData(value: unknown, measurement: string): WeatherData 
     !measurements.every(
       (measurementValue) =>
         measurementValue === null ||
-        (typeof measurementValue === 'number' && Number.isFinite(measurementValue)),
+        (typeof measurementValue === 'number' &&
+          Number.isFinite(measurementValue)),
     ) ||
     dates.length !== measurements.length
   ) {
@@ -68,7 +83,9 @@ function normalizeWeatherData(value: unknown, measurement: string): WeatherData 
   };
 }
 
-async function retrieveWeatherData(request: AnalysisRequest): Promise<WeatherData> {
+async function fetchRawWeatherData(
+  request: AnalysisRequest,
+): Promise<WeatherData> {
   const params = new URLSearchParams({
     latitude: request.location.latitude.toString(),
     longitude: request.location.longitude.toString(),
@@ -137,16 +154,61 @@ async function retrieveWeatherData(request: AnalysisRequest): Promise<WeatherDat
     );
   }
 
-  const normalized = normalizeWeatherData(data, request.measurement);
+  return normalizeWeatherData(data, request.measurement);
+}
+
+async function retrieveWeatherData(
+  request: AnalysisRequest,
+): Promise<WeatherData> {
+  const key = rawWeatherRequestKey(request);
+  const rawData = await rawWeatherCache.getOrLoad(key, async () => {
+    await openMeteoRateLimiter.reserve(estimateOpenMeteoCallCost(request));
+    return fetchRawWeatherData(request);
+  });
+
   return {
-    dates: normalized.dates,
-    values: normalized.values.map((value) =>
-      value === null ? null : convertFromMetric(value, request.measurement, request.metricUnits),
+    dates: rawData.dates,
+    values: rawData.values.map((value) =>
+      value === null
+        ? null
+        : convertFromMetric(value, request.measurement, request.metricUnits),
     ),
   };
 }
 
-export async function analyzeWeatherRequest(request: AnalysisRequest): Promise<GraphPoint[]> {
+export function planWeatherRequests(
+  requests: AnalysisRequest[],
+): WeatherRequestPlan {
+  const missingRequests = new Map<string, AnalysisRequest>();
+
+  for (const request of requests) {
+    const key = rawWeatherRequestKey(request);
+
+    if (!rawWeatherCache.hasAvailable(key)) {
+      missingRequests.set(key, request);
+    }
+  }
+
+  const estimatedOpenMeteoCalls = [...missingRequests.values()].reduce(
+    (total, request) => total + estimateOpenMeteoCallCost(request),
+    0,
+  );
+
+  return {
+    cacheMisses: missingRequests.size,
+    estimatedOpenMeteoCalls,
+    requiresConfirmation:
+      estimatedOpenMeteoCalls > openMeteoConfirmationThreshold,
+  };
+}
+
+export function clearRawWeatherCacheForTests(): void {
+  rawWeatherCache.clear();
+}
+
+export async function analyzeWeatherRequest(
+  request: AnalysisRequest,
+): Promise<GraphPoint[]> {
   const weatherData = await retrieveWeatherData(request);
 
   const analysisOptions: AnalysisOptions = {

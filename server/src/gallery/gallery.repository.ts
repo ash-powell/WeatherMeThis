@@ -4,7 +4,11 @@ import type { Document, Filter, Sort } from 'mongodb';
 
 import { getDatabase, getMongoClient } from '../database/mongodb.js';
 
-import type { SavedReport, ReportSearchFacet } from '../reports/report.models.js';
+import type {
+  SavedReport,
+  ReportSearchFacet,
+} from '../reports/report.models.js';
+import { attachReportResults } from '../reports/report-results.repository.js';
 
 import type {
   GalleryQuery,
@@ -35,7 +39,9 @@ function escapeRegularExpression(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-export function buildSearchFacets(report: Pick<SavedReport, 'charts'>): ReportSearchFacet[] {
+export function buildSearchFacets(
+  report: Pick<SavedReport, 'charts'>,
+): ReportSearchFacet[] {
   const uniqueFacets = new Map<string, ReportSearchFacet>();
 
   for (const chart of report.charts) {
@@ -379,7 +385,7 @@ export async function findPublicReportById(
     ])
     .next();
 
-  return reports;
+  return reports ? attachReportResults(reports) : null;
 }
 
 export async function findLikedReportIds(
@@ -533,7 +539,9 @@ export async function unlikePublicReport(
   return removed;
 }
 
-export async function deleteGalleryDataForUser(auth0UserId: string): Promise<void> {
+export async function deleteGalleryDataForUser(
+  auth0UserId: string,
+): Promise<void> {
   const client = getMongoClient();
   const session = client.startSession();
 

@@ -19,6 +19,10 @@ export function createApp(): express.Express {
     }),
   );
 
+  // Exact-date chart results can make saved-story payloads substantially larger
+  // than ordinary API requests. Keep the larger limit scoped to report routes.
+  app.use('/api/reports', express.json({ limit: '25mb' }), reportRouter);
+
   app.use(express.json());
 
   app.get('/', (_req, res) => {
@@ -28,17 +32,23 @@ export function createApp(): express.Express {
   app.use('/api/locations', locationRouter);
   app.use('/api/account', accountRouter);
   app.use('/api/gallery', galleryRouter);
-  app.use('/api/reports', reportRouter);
   app.use('/api/weather', weatherRouter);
 
   app.use(
-    (error: unknown, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+    (
+      error: unknown,
+      _req: express.Request,
+      res: express.Response,
+      next: express.NextFunction,
+    ) => {
       if (
         error instanceof MongoServerError &&
         error.code === 11000 &&
         error.message.includes('unique_story_name_per_user')
       ) {
-        res.status(409).json({ message: 'You already have a saved story with this name.' });
+        res
+          .status(409)
+          .json({ message: 'You already have a saved story with this name.' });
         return;
       }
       next(error);

@@ -57,13 +57,68 @@ describe('Moving averages in saved reports', () => {
 
   it('loads older series without a moving-average field as disabled', () => {
     assert.equal(
-      validateReportRequest(reportWithWindows([undefined]))?.charts[0].seriesArray[0]
-        .movingAverageWindow,
+      validateReportRequest(reportWithWindows([undefined]))?.charts[0]
+        .seriesArray[0].movingAverageWindow,
       null,
     );
   });
 
   it('rejects an invalid moving-average window on any series', () => {
     assert.equal(validateReportRequest(reportWithWindows([null, 1, 5])), null);
+  });
+});
+
+describe('Stored chart results', () => {
+  it('accepts compact computed results and their calculation fingerprint', () => {
+    const value = reportWithWindows([null]);
+    (value.charts[0] as Record<string, unknown>).renderedSeries = [
+      {
+        label: 'Raleigh rain',
+        yAxisId: 'rain_sum',
+        yAxisLabel: 'Rain (inch)',
+        requestKey: '["calculation fingerprint"]',
+        dates: ['2024', '2025'],
+        values: [42.5, null],
+      },
+    ];
+
+    assert.deepEqual(validateReportRequest(value)?.charts[0].renderedSeries, [
+      {
+        label: 'Raleigh rain',
+        yAxisId: 'rain_sum',
+        yAxisLabel: 'Rain (inch)',
+        requestKey: '["calculation fingerprint"]',
+        dates: ['2024', '2025'],
+        values: [42.5, null],
+      },
+    ]);
+  });
+
+  it('accepts unfinished series as null and rejects malformed point arrays', () => {
+    const partial = reportWithWindows([null]);
+    (partial.charts[0] as Record<string, unknown>).renderedSeries = [null];
+    assert.deepEqual(validateReportRequest(partial)?.charts[0].renderedSeries, [
+      null,
+    ]);
+
+    const malformed = reportWithWindows([null]);
+    (malformed.charts[0] as Record<string, unknown>).renderedSeries = [
+      {
+        label: 'Rain',
+        yAxisId: 'rain_sum',
+        yAxisLabel: 'Rain (inch)',
+        dates: ['2025'],
+        values: [],
+      },
+    ];
+    assert.equal(validateReportRequest(malformed), null);
+  });
+
+  it('keeps older stories without computed results backward compatible', () => {
+    assert.equal(
+      validateReportRequest(reportWithWindows([null]))?.charts[0]
+        .renderedSeries,
+      undefined,
+    );
   });
 });

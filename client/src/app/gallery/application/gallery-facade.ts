@@ -1,6 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 
-import { forkJoin, map, of, switchMap, tap } from 'rxjs';
+import { map, of, tap } from 'rxjs';
 
 import type { Observable } from 'rxjs';
 
@@ -15,12 +15,6 @@ import type {
   PublicationResponse,
 } from '../models/gallery.models';
 
-import { WeatherApi } from '../../weather/data-access/weather-api';
-
-import { buildGraphSeries } from '../../weather/domain/graph-series.builder';
-
-import type { AnalysisRequest } from '../../weather/models/analysis.models';
-
 import type { ChartInput } from '../../reports/models/report-editor.models';
 
 @Injectable({
@@ -28,7 +22,6 @@ import type { ChartInput } from '../../reports/models/report-editor.models';
 })
 export class GalleryFacade {
   private readonly galleryApi = inject(GalleryApi);
-  private readonly weatherApi = inject(WeatherApi);
 
   private readonly searchResponseState = signal<GallerySearchResponse | null>(null);
 
@@ -85,14 +78,10 @@ export class GalleryFacade {
       tap((report) => {
         this.currentReportState.set(report);
       }),
-      switchMap((report) =>
-        this.buildCharts(report).pipe(
-          map((charts) => ({
-            report,
-            charts,
-          })),
-        ),
-      ),
+      map((report) => ({
+        report,
+        charts: this.buildCharts(report),
+      })),
     );
   }
 
@@ -139,56 +128,36 @@ export class GalleryFacade {
     );
   }
 
-  private buildCharts(report: PublicGalleryReport): Observable<ChartInput[]> {
-    let nextSeriesId = 1;
+  private buildCharts(report: PublicGalleryReport): ChartInput[] {
+    return report.charts.map((chart, chartIndex) => ({
+      chartId: chartIndex + 1,
+      name: chart.name ?? '',
+      comments: chart.comments,
+      chartType: chart.chartType ?? 'line',
+      pendingChartType: chart.chartType ?? 'line',
+      metricUnits: chart.metricUnits === true,
+      groupBy: chart.groupBy,
+      chartWideEdit: false,
+      seriesInputs: [],
+      graphSeries: (chart.renderedSeries ?? []).flatMap((result, seriesIndex) => {
+        if (!result) {
+          return [];
+        }
 
-    const chartRequests = report.charts.map((chart, chartIndex) => {
-      const legacyWindow = (
-        chart as typeof chart & { movingAverageWindow?: number | null }
-      ).movingAverageWindow;
-      const seriesRequests = chart.seriesArray.map((series) => {
-        const seriesId = nextSeriesId++;
-
-        const analysis: AnalysisRequest = {
-          metricUnits: chart.metricUnits === true,
-          location: {
-            ...series.location,
+        return [
+          {
+            seriesId: seriesIndex + 1,
+            label: result.label,
+            yAxisId: result.yAxisId,
+            yAxisLabel: result.yAxisLabel,
+            requestKey: result.requestKey,
+            points: result.dates.map((date, pointIndex) => ({
+              date,
+              value: result.values[pointIndex] ?? null,
+            })),
           },
-          startDate: series.startDate,
-          endDate: series.endDate,
-          dateFilter: {
-            ...series.dateFilter,
-          },
-          measurement: series.measurement,
-          comparison: series.comparison,
-          threshold: series.threshold,
-          aggregation: series.aggregation,
-          avgFrequency: series.avgFrequency,
-          groupBy: chart.groupBy,
-          movingAverageWindow: series.movingAverageWindow ?? legacyWindow ?? null,
-        };
-
-        return this.weatherApi
-          .analyze(analysis)
-          .pipe(map((points) => buildGraphSeries(seriesId, analysis, points, series.title)));
-      });
-
-      return forkJoin(seriesRequests).pipe(
-        map((graphSeries) => ({
-          chartId: chartIndex + 1,
-          name: chart.name ?? '',
-          comments: chart.comments,
-          chartType: chart.chartType ?? 'line',
-          pendingChartType: chart.chartType ?? 'line',
-          metricUnits: chart.metricUnits === true,
-          groupBy: chart.groupBy,
-          chartWideEdit: false,
-          seriesInputs: [],
-          graphSeries,
-        })),
-      );
-    });
-
-    return forkJoin(chartRequests);
+        ];
+      }),
+    }));
   }
 }

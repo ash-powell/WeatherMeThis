@@ -59,4 +59,43 @@ describe('Gallery chart comments', () => {
     expect(content.hidden).toBe(false);
     fixture.destroy();
   });
+
+  it('shows editor-only chart order buttons before the title and emits move requests', async () => {
+    await TestBed.configureTestingModule({ imports: [ReportCharts] }).compileComponents();
+    const fixture = TestBed.createComponent(ReportCharts);
+    const chart = {
+      ...new ReportEditorStore().report().charts[0],
+      name: 'Raleigh rainfall',
+    };
+    const moves: Array<{ chartId: number; direction: -1 | 1 }> = [];
+    fixture.componentInstance.chartMoveRequested.subscribe((request) => moves.push(request));
+    fixture.componentRef.setInput('charts', [chart]);
+    fixture.componentRef.setInput('showOrderControls', true);
+    fixture.componentRef.setInput('canMoveUp', false);
+    fixture.componentRef.setInput('canMoveDown', true);
+    fixture.detectChanges();
+
+    const heading = fixture.nativeElement.querySelector('.chart-heading') as HTMLElement;
+    const orderControls = heading.firstElementChild as HTMLElement;
+    const buttons = Array.from(orderControls.querySelectorAll('button')) as HTMLButtonElement[];
+
+    expect(orderControls.classList.contains('chart-order-buttons')).toBe(true);
+    expect(orderControls.nextElementSibling?.tagName).toBe('H2');
+    expect(buttons[0].disabled).toBe(true);
+    expect(buttons[1].disabled).toBe(false);
+
+    buttons[1].click();
+    expect(moves).toEqual([{ chartId: chart.chartId, direction: 1 }]);
+    fixture.destroy();
+  });
+
+  it('does not show chart order controls in read-only chart views', async () => {
+    await TestBed.configureTestingModule({ imports: [ReportCharts] }).compileComponents();
+    const fixture = TestBed.createComponent(ReportCharts);
+    fixture.componentRef.setInput('charts', new ReportEditorStore().report().charts);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.chart-order-buttons')).toBeNull();
+    fixture.destroy();
+  });
 });

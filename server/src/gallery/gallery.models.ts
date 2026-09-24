@@ -1,4 +1,5 @@
 import type { Measurement } from '../weather/weather.models.js';
+import type { ObjectId } from 'mongodb';
 
 import type { ReportChart } from '../reports/report.models.js';
 
@@ -26,7 +27,7 @@ export interface GalleryReportSummary {
 }
 
 export interface PublicGalleryReport {
-  _id: string;
+  _id: ObjectId;
   name: string;
   charts: ReportChart[];
   authorDisplayName: string;

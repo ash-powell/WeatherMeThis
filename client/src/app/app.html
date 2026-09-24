@@ -183,7 +183,7 @@
       [(autopopulate)]="autopopulate"
       (editorMessage)="showMessage($event)"
       (locationSearchRequested)="searchCity($event.chartId, $event.series)"
-      (weatherDataRequested)="getWeatherData($event.chartId, $event.chartType)"
+      (weatherDataRequested)="getWeatherData($event.chartId, $event.seriesId, $event.chartType)"
     />
 
     <!-- <app-report-charts [charts]="report().charts" /> -->

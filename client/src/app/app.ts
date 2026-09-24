@@ -12,7 +12,7 @@ import { AsyncPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, map } from 'rxjs';
+import { filter, firstValueFrom, map } from 'rxjs';
 import { AuthService } from '@auth0/auth0-angular';
 
 import { ReportDraftStorage } from './reports/data-access/report-draft-storage';
@@ -23,8 +23,9 @@ import type { SeriesInput } from './reports/models/report-editor.models';
 
 import type { AnalysisRequest, GroupBy } from './weather/models/analysis.models';
 import type { ChartType } from './weather/models/chart.models';
+import { analysisRequestKey } from './weather/domain/analysis-request-key';
 
-import type { ReportRequest, SavedReport } from './reports/models/report.models';
+import type { ReportRequest, SavedReportSummary } from './reports/models/report.models';
 
 import { buildAnalysisRequest as buildAnalysisRequestResult } from './reports/domain/analysis-request.builder';
 
@@ -266,6 +267,13 @@ export class App implements OnInit {
         this.tutorialLoading.set(false);
         this.dialogs.close();
         void this.router.navigateByUrl('/');
+
+        if (!charts.some((chart) => chart.graphSeries.length > 0)) {
+          this.dialogs.show(
+            'This story does not contain stored chart data yet. Show the controls and use Get Data to rebuild its series.',
+            'Stored chart data',
+          );
+        }
       },
       error: (error: HttpErrorResponse) => {
         this.tutorialLoading.set(false);
@@ -383,11 +391,11 @@ export class App implements OnInit {
     });
   }
 
-  getWeatherData(chartId: number, requestedChartType?: ChartType): void {
-    const modalRequestId = ++this.nextWeatherModalRequest;
-    this.latestWeatherModalRequest = modalRequestId;
-    this.dialogs.showLoading('Retrieving data...', 'Weather data');
-
+  async getWeatherData(
+    chartId: number,
+    seriesId: number,
+    requestedChartType?: ChartType,
+  ): Promise<void> {
     const chart = this.report().charts.find((candidate) => candidate.chartId === chartId);
 
     if (!chart) {
@@ -395,21 +403,91 @@ export class App implements OnInit {
       return;
     }
 
-    const requests = [];
+    const selectedSeries = chart.seriesInputs.find((series) => series.seriesId === seriesId);
 
-    for (const series of chart.seriesInputs) {
-      const analysis = this.buildAnalysisRequest(
-        series,
-        chart.groupBy,
-        chart.metricUnits,
+    if (!selectedSeries) {
+      this.showMessage('Series not found');
+      return;
+    }
+
+    const analysesBySeriesId = new Map<number, AnalysisRequest>();
+    const selectedAnalysis = this.buildAnalysisRequest(
+      selectedSeries,
+      chart.groupBy,
+      chart.metricUnits,
+    );
+
+    if (!selectedAnalysis) {
+      return;
+    }
+
+    analysesBySeriesId.set(seriesId, selectedAnalysis);
+
+    // Refresh other displayed series only when their current controls no longer
+    // match the calculation that produced their stored chart points.
+    for (const rendered of chart.graphSeries) {
+      const series = chart.seriesInputs.find(
+        (candidate) => candidate.seriesId === rendered.seriesId,
       );
+
+      if (!series || series.seriesId === seriesId) {
+        continue;
+      }
+
+      const analysis = this.buildAnalysisRequest(series, chart.groupBy, chart.metricUnits);
 
       if (!analysis) {
         return;
       }
 
-      requests.push({ seriesId: series.seriesId, analysis });
+      if (rendered.requestKey !== analysisRequestKey(analysis)) {
+        analysesBySeriesId.set(series.seriesId, analysis);
+      }
     }
+
+    const requests = chart.seriesInputs.flatMap((series) => {
+      const analysis = analysesBySeriesId.get(series.seriesId);
+      return analysis ? [{ seriesId: series.seriesId, analysis }] : [];
+    });
+
+    let plan;
+
+    try {
+      plan = await firstValueFrom(
+        this.reportFacade.planWeatherRequests(requests.map((request) => request.analysis)),
+      );
+    } catch (error) {
+      console.error('Weather request planning failed:', error);
+      this.showMessage('Unable to prepare the weather data request.');
+      return;
+    }
+
+    if (plan.requiresConfirmation) {
+      const shouldContinue = await this.dialogs.confirm({
+        title: 'Large weather data retrieval',
+        message:
+          `${plan.cacheMisses} uncached weather dataset${plan.cacheMisses === 1 ? '' : 's'} ` +
+          `must be retrieved from Open-Meteo. The estimated cost is ` +
+          `${plan.estimatedOpenMeteoCalls.toFixed(1)} weighted API calls. ` +
+          `WeatherMeThis will pace the requests to stay below the per-minute limit. ` +
+          `Keep this page open until retrieval finishes.`,
+        confirmLabel: 'Retrieve data',
+        cancelLabel: 'Cancel',
+      });
+
+      if (!shouldContinue) {
+        return;
+      }
+    }
+
+    const modalRequestId = ++this.nextWeatherModalRequest;
+    this.latestWeatherModalRequest = modalRequestId;
+    this.dialogs.showLoading(
+      plan.requiresConfirmation
+        ? 'Retrieving data in paced groups from Open-Meteo...'
+        : 'Retrieving data...',
+      'Weather data',
+    );
 
     this.reportFacade
       .loadChartWeatherData(chartId, requests, requestedChartType ?? chart.chartType)
@@ -515,13 +593,26 @@ export class App implements OnInit {
     });
   }
 
-  selectReport(saved: SavedReport): void {
+  selectReport(saved: SavedReportSummary): void {
     this.savedStoriesOpen.set(false);
-    const charts = this.reportFacade.selectReport(saved);
+    this.dialogs.showLoading('Loading saved story...', 'My Saved Stories');
 
-    for (const chart of charts) {
-      this.getWeatherData(chart.chartId);
-    }
+    this.reportFacade.loadSavedReport(saved._id).subscribe({
+      next: (charts) => {
+        this.dialogs.close();
+
+        if (!charts.some((chart) => chart.graphSeries.length > 0)) {
+          this.dialogs.show(
+            'This older story does not contain stored chart data. Show the controls, use Get Data for each series, and then choose Save Changes.',
+            'Stored chart data',
+          );
+        }
+      },
+      error: (error) => {
+        console.error('Saved story retrieval failed:', error);
+        this.dialogs.show('Unable to load the saved story.', 'My Saved Stories');
+      },
+    });
   }
 
   updateReport(): void {

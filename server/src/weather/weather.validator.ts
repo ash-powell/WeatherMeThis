@@ -1,4 +1,4 @@
-import { measurementNames } from "./measurement.models.js";
+import { measurementNames } from './measurement.models.js';
 import type {
   Aggregation,
   AnalysisLocation,
@@ -10,52 +10,52 @@ import type {
   DateFilterUnit,
   GroupBy,
   Measurement,
-} from "./weather.models.js";
+} from './weather.models.js';
 
 const measurements: readonly Measurement[] = measurementNames;
 
 const dateFilterUnits: readonly DateFilterUnit[] = [
-  "day",
-  "monthDay",
-  "month",
-  "yearMonth",
-  "year",
-  "none",
+  'day',
+  'monthDay',
+  'month',
+  'yearMonth',
+  'year',
+  'none',
 ];
 
 const groupByOptions: readonly GroupBy[] = [
-  "year",
-  "month",
-  "day",
-  "yearMonth",
-  "monthDay",
-  "yearMonthDay",
-  "all",
+  'year',
+  'month',
+  'day',
+  'yearMonth',
+  'monthDay',
+  'yearMonthDay',
+  'all',
 ];
 
 const aggregations: readonly Aggregation[] = [
-  "count",
-  "sum",
-  "min",
-  "max",
-  "avgSum",
-  "avgCnt",
-  "avgMatchingDays",
-  "rawValues",
+  'count',
+  'sum',
+  'min',
+  'max',
+  'avgSum',
+  'avgCnt',
+  'avgMatchingDays',
+  'rawValues',
 ];
 
-const comparisons: readonly Comparison[] = [">", ">=", "<", "<=", "=", "none"];
+const comparisons: readonly Comparison[] = ['>', '>=', '<', '<=', '=', 'none'];
 
 const averageFrequencies: readonly AvgFrequency[] = [
-  "daily",
-  "weekly",
-  "monthly",
-  "yearly",
-  "none",
+  'daily',
+  'weekly',
+  'monthly',
+  'yearly',
+  'none',
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function isOneOf<T extends string>(
@@ -63,7 +63,7 @@ function isOneOf<T extends string>(
   permittedValues: readonly T[],
 ): value is T {
   return (
-    typeof value === "string" &&
+    typeof value === 'string' &&
     permittedValues.some((permittedValue) => permittedValue === value)
   );
 }
@@ -96,9 +96,9 @@ export function hasValidMovingAverageOptions(
   const permittedDateFilters: Partial<
     Record<GroupBy, readonly DateFilterUnit[]>
   > = {
-    year: ["none", "month", "monthDay", "day"],
-    yearMonth: ["none", "day"],
-    yearMonthDay: ["none"],
+    year: ['none', 'month', 'monthDay', 'day'],
+    yearMonth: ['none', 'day'],
+    yearMonthDay: ['none'],
   };
 
   return permittedDateFilters[groupBy]?.includes(dateFilterUnit) === true;
@@ -140,11 +140,11 @@ function getDaysInMonth(year: number, month: number): number {
 }
 
 function isIsoDate(value: unknown): value is string {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return false;
   }
 
-  const [yearString, monthString, dayString] = value.split("-");
+  const [yearString, monthString, dayString] = value.split('-');
 
   const year = Number(yearString);
   const month = Number(monthString);
@@ -193,22 +193,22 @@ function isValidMonthDay(value: string): boolean {
 
 function isValidDateFilterValue(value: string, unit: DateFilterUnit): boolean {
   switch (unit) {
-    case "day":
+    case 'day':
       return isValidDay(value);
 
-    case "month":
+    case 'month':
       return isValidMonth(value);
 
-    case "monthDay":
+    case 'monthDay':
       return isValidMonthDay(value);
 
-    case "year":
+    case 'year':
       return isValidYear(value);
 
-    case "yearMonth":
+    case 'yearMonth':
       return isValidYearMonth(value);
 
-    case "none":
+    case 'none':
       return true;
   }
 }
@@ -222,8 +222,8 @@ function validateDateFilter(value: unknown): DateFilter | null {
 
   if (
     !isDateFilterUnit(unit) ||
-    typeof min !== "string" ||
-    typeof max !== "string"
+    typeof min !== 'string' ||
+    typeof max !== 'string'
   ) {
     return null;
   }
@@ -250,16 +250,16 @@ function validateLocation(value: unknown): AnalysisLocation | null {
   const { city, admin1, country, latitude, longitude } = value;
 
   if (
-    typeof city !== "string" ||
-    city.trim() === "" ||
-    (admin1 !== null && typeof admin1 !== "string") ||
-    typeof country !== "string" ||
-    country.trim() === "" ||
-    typeof latitude !== "number" ||
+    typeof city !== 'string' ||
+    city.trim() === '' ||
+    (admin1 !== null && typeof admin1 !== 'string') ||
+    typeof country !== 'string' ||
+    country.trim() === '' ||
+    typeof latitude !== 'number' ||
     !Number.isFinite(latitude) ||
     latitude < -90 ||
     latitude > 90 ||
-    typeof longitude !== "number" ||
+    typeof longitude !== 'number' ||
     !Number.isFinite(longitude) ||
     longitude < -180 ||
     longitude > 180
@@ -284,35 +284,35 @@ function hasValidOptionRelationships(
   threshold: number | null,
 ): boolean {
   const isAverage =
-    aggregation === "avgSum" ||
-    aggregation === "avgCnt" ||
-    aggregation === "avgMatchingDays";
+    aggregation === 'avgSum' ||
+    aggregation === 'avgCnt' ||
+    aggregation === 'avgMatchingDays';
 
-  if (isAverage && avgFrequency === "none") {
+  if (isAverage && avgFrequency === 'none') {
     return false;
   }
 
-  if (!isAverage && avgFrequency !== "none") {
+  if (!isAverage && avgFrequency !== 'none') {
     return false;
   }
 
-  if (aggregation === "avgMatchingDays" && avgFrequency !== "daily")
+  if (aggregation === 'avgMatchingDays' && avgFrequency !== 'daily')
     return false;
 
-  if (aggregation === "avgMatchingDays" && comparison === "none") return false;
+  if (aggregation === 'avgMatchingDays' && comparison === 'none') return false;
 
   if (
-    (aggregation === "rawValues" && groupBy !== "yearMonthDay") ||
-    (aggregation !== "rawValues" && groupBy === "yearMonthDay")
+    (aggregation === 'rawValues' && groupBy !== 'yearMonthDay') ||
+    (aggregation !== 'rawValues' && groupBy === 'yearMonthDay')
   ) {
     return false;
   }
 
-  if (comparison === "none" && threshold !== null) {
+  if (comparison === 'none' && threshold !== null) {
     return false;
   }
 
-  if (comparison !== "none" && threshold === null) {
+  if (comparison !== 'none' && threshold === null) {
     return false;
   }
 
@@ -345,14 +345,14 @@ export function validateAnalysisSeries(
     !dateFilter ||
     !isIsoDate(startDate) ||
     !isIsoDate(endDate) ||
-    startDate < "1940-01-01" ||
+    startDate < '1940-01-01' ||
     startDate > endDate ||
     !isMeasurement(measurement) ||
     !isComparison(comparison) ||
     !isAggregation(aggregation) ||
     !isAvgFrequency(avgFrequency) ||
     (threshold !== null &&
-      (typeof threshold !== "number" || !Number.isFinite(threshold)))
+      (typeof threshold !== 'number' || !Number.isFinite(threshold)))
   ) {
     return null;
   }
@@ -395,7 +395,7 @@ export function validateAnalysisRequest(
     return null;
   }
 
-  if (value.metricUnits !== undefined && typeof value.metricUnits !== "boolean")
+  if (value.metricUnits !== undefined && typeof value.metricUnits !== 'boolean')
     return null;
 
   const series = validateAnalysisSeries(value, groupBy);
@@ -408,7 +408,7 @@ export function validateAnalysisRequest(
 
   if (
     movingAverageWindow !== null &&
-    (typeof movingAverageWindow !== "number" ||
+    (typeof movingAverageWindow !== 'number' ||
       !Number.isFinite(movingAverageWindow))
   ) {
     return null;
@@ -430,4 +430,28 @@ export function validateAnalysisRequest(
     groupBy,
     movingAverageWindow,
   };
+}
+
+export function validateAnalysisPlan(value: unknown): AnalysisRequest[] | null {
+  if (!isRecord(value) || !Array.isArray(value.analyses)) {
+    return null;
+  }
+
+  if (value.analyses.length === 0 || value.analyses.length > 100) {
+    return null;
+  }
+
+  const analyses: AnalysisRequest[] = [];
+
+  for (const analysisValue of value.analyses) {
+    const analysis = validateAnalysisRequest(analysisValue);
+
+    if (!analysis) {
+      return null;
+    }
+
+    analyses.push(analysis);
+  }
+
+  return analyses;
 }

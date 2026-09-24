@@ -7,6 +7,7 @@ import { getAuth0UserId } from '../auth/auth.middleware.js';
 import {
   createReport as createReportDocument,
   deleteReportById,
+  findReportById,
   findReportsByUser,
   updateReportById,
 } from './report.repository.js';
@@ -24,7 +25,10 @@ export async function createReport(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const insertedId = await createReportDocument(reportRequest, getAuth0UserId(req));
+  const insertedId = await createReportDocument(
+    reportRequest,
+    getAuth0UserId(req),
+  );
 
   res.status(201).json({
     message: 'Report saved',
@@ -38,7 +42,31 @@ export async function getReports(req: Request, res: Response): Promise<void> {
   res.status(200).json(reports);
 }
 
-export async function updateReport(req: Request<{ id: string }>, res: Response): Promise<void> {
+export async function getReport(
+  req: Request<{ id: string }>,
+  res: Response,
+): Promise<void> {
+  const { id } = req.params;
+
+  if (!ObjectId.isValid(id)) {
+    res.status(400).json({ message: 'Invalid report ID' });
+    return;
+  }
+
+  const report = await findReportById(new ObjectId(id), getAuth0UserId(req));
+
+  if (!report) {
+    res.status(404).json({ message: 'Report not found' });
+    return;
+  }
+
+  res.status(200).json(report);
+}
+
+export async function updateReport(
+  req: Request<{ id: string }>,
+  res: Response,
+): Promise<void> {
   const { id } = req.params;
 
   if (!ObjectId.isValid(id)) {
@@ -59,7 +87,11 @@ export async function updateReport(req: Request<{ id: string }>, res: Response):
     return;
   }
 
-  const matched = await updateReportById(new ObjectId(id), getAuth0UserId(req), reportRequest);
+  const matched = await updateReportById(
+    new ObjectId(id),
+    getAuth0UserId(req),
+    reportRequest,
+  );
 
   if (!matched) {
     res.status(404).json({
@@ -74,7 +106,10 @@ export async function updateReport(req: Request<{ id: string }>, res: Response):
   });
 }
 
-export async function deleteReport(req: Request<{ id: string }>, res: Response): Promise<void> {
+export async function deleteReport(
+  req: Request<{ id: string }>,
+  res: Response,
+): Promise<void> {
   const { id } = req.params;
 
   if (!ObjectId.isValid(id)) {

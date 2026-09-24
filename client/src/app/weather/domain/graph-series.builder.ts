@@ -3,6 +3,8 @@ import type { AnalysisRequest, Aggregation, Measurement } from '../models/analys
 
 import type { GraphPoint, GraphSeries } from '../models/graph.models';
 
+import { analysisRequestKey } from './analysis-request-key';
+
 interface YAxisInfo {
   id: string;
   label: string;
@@ -62,7 +64,6 @@ function getAggregationLabel(aggregation: Aggregation): string {
 
     case 'avgMatchingDays':
       return 'Average on Matching Days';
-
   }
 }
 
@@ -86,6 +87,7 @@ export function buildGraphSeries(
     points,
     yAxisId: yAxis.id,
     yAxisLabel: yAxis.label,
+    requestKey: analysisRequestKey(analysis),
   };
 }
 

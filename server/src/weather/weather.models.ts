@@ -16,7 +16,8 @@ export type Measurement =
   | 'et0_fao_evapotranspiration'
   | 'weather_code';
 
-export type DateFilterUnit = 'day' | 'monthDay' | 'month' | 'yearMonth' | 'year' | 'none';
+export type DateFilterUnit =
+  'day' | 'monthDay' | 'month' | 'yearMonth' | 'year' | 'none';
 
 export interface DateFilter {
   unit: DateFilterUnit;
@@ -25,11 +26,31 @@ export interface DateFilter {
 }
 
 export type Month =
-  '01' | '02' | '03' | '04' | '05' | '06' | '07' | '08' | '09' | '10' | '11' | '12';
+  | '01'
+  | '02'
+  | '03'
+  | '04'
+  | '05'
+  | '06'
+  | '07'
+  | '08'
+  | '09'
+  | '10'
+  | '11'
+  | '12';
 
-export type GroupBy = 'year' | 'month' | 'day' | 'yearMonth' | 'monthDay' | 'yearMonthDay' | 'all';
+export type GroupBy =
+  'year' | 'month' | 'day' | 'yearMonth' | 'monthDay' | 'yearMonthDay' | 'all';
 
-export type Aggregation = 'count' | 'sum' | 'min' | 'max' | 'avgSum' | 'avgCnt' | 'avgMatchingDays' | 'rawValues';
+export type Aggregation =
+  | 'count'
+  | 'sum'
+  | 'min'
+  | 'max'
+  | 'avgSum'
+  | 'avgCnt'
+  | 'avgMatchingDays'
+  | 'rawValues';
 
 export type Comparison = '>' | '>=' | '<' | '<=' | '=' | 'none';
 
@@ -81,4 +102,10 @@ export interface WeatherData {
 export interface GraphPoint {
   date: string;
   value: number | null;
+}
+
+export interface WeatherRequestPlan {
+  cacheMisses: number;
+  estimatedOpenMeteoCalls: number;
+  requiresConfirmation: boolean;
 }

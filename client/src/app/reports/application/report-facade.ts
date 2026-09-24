@@ -19,7 +19,7 @@ import type {
   SeriesInput,
   SharedSeriesField,
 } from '../models/report-editor.models';
-import type { ReportRequest, SavedReport } from '../models/report.models';
+import type { ReportRequest, SavedReport, SavedReportSummary } from '../models/report.models';
 import { ReportEditorStore } from '../state/report-editor-store';
 import { ReportLayoutState } from '../state/report-layout-state';
 
@@ -39,7 +39,7 @@ export class ReportFacade {
 
   private readonly weatherApi = inject(WeatherApi);
 
-  private readonly savedReportsState = signal<SavedReport[]>([]);
+  private readonly savedReportsState = signal<SavedReportSummary[]>([]);
 
   private readonly reportIdState = signal<string | null>(null);
 
@@ -70,6 +70,10 @@ export class ReportFacade {
     return charts;
   }
 
+  loadSavedReport(reportId: string): Observable<ChartInput[]> {
+    return this.reportApi.getById(reportId).pipe(map((report) => this.selectReport(report)));
+  }
+
   openReportCopy(report: ReportRequest, renderedCharts: ChartInput[]): ChartInput[] {
     this.latestWeatherRequest.clear();
     const charts = this.reportEditorStore.loadReportCopy(report, renderedCharts);
@@ -83,7 +87,7 @@ export class ReportFacade {
     return charts;
   }
 
-  loadSavedReports(): Observable<SavedReport[]> {
+  loadSavedReports(): Observable<SavedReportSummary[]> {
     return this.reportApi.getAll().pipe(
       tap((reports) => {
         this.savedReportsState.set(reports);
@@ -170,7 +174,6 @@ export class ReportFacade {
 
         this.reportEditorStore.updateChart(chartId, (chart) => {
           if (
-            chart.seriesInputs.length !== requests.length ||
             !requests.every((request) =>
               chart.seriesInputs.some((series) => series.seriesId === request.seriesId),
             )
@@ -179,25 +182,41 @@ export class ReportFacade {
 
           chartWasBuilt = true;
 
-          // Replace the whole chart together; never mix partially loaded unit systems.
+          const updatedSeries = new Map(
+            chart.graphSeries.map((graphSeries) => [graphSeries.seriesId, graphSeries]),
+          );
+
+          results.forEach((points, index) => {
+            const request = requests[index];
+
+            updatedSeries.set(
+              request.seriesId,
+              buildGraphSeries(
+                request.seriesId,
+                request.analysis,
+                points,
+                chart.seriesInputs.find((series) => series.seriesId === request.seriesId)?.title,
+              ),
+            );
+          });
+
           return {
             ...chart,
             chartType: chartType ?? chart.chartType,
-            graphSeries: results.map((points, index) =>
-              buildGraphSeries(
-                requests[index].seriesId,
-                requests[index].analysis,
-                points,
-                chart.seriesInputs.find((series) => series.seriesId === requests[index].seriesId)
-                  ?.title,
-              ),
-            ),
+            graphSeries: chart.seriesInputs.flatMap((series) => {
+              const graphSeries = updatedSeries.get(series.seriesId);
+              return graphSeries ? [graphSeries] : [];
+            }),
           };
         });
 
         return chartWasBuilt;
       }),
     );
+  }
+
+  planWeatherRequests(requests: AnalysisRequest[]) {
+    return this.weatherApi.plan(requests);
   }
 
   restoreDraft(report: ReportInput, reportId: string | null, loadedStoryName: string | null): void {
@@ -257,13 +276,17 @@ export class ReportFacade {
     this.reportEditorStore.moveChart(chartId, direction);
   }
 
-  addChart(afterChartId?: number): number | null {
-    return this.reportEditorStore.addChart(afterChartId);
+  moveSeries(chartId: number, seriesId: number, direction: -1 | 1): void {
+    this.reportEditorStore.moveSeries(chartId, seriesId, direction);
   }
 
-addSeries(chartId: number, sourceSeriesId: number, autopopulate: boolean,): number | null {
-  return this.reportEditorStore.addSeries(chartId, sourceSeriesId, autopopulate,);
-}
+  addChart(afterChartId?: number, autopopulate = false): number | null {
+    return this.reportEditorStore.addChart(afterChartId, autopopulate);
+  }
+
+  addSeries(chartId: number, sourceSeriesId: number, autopopulate: boolean): number | null {
+    return this.reportEditorStore.addSeries(chartId, sourceSeriesId, autopopulate);
+  }
 
   setChartWideEdit(chartId: number, enabled: boolean): void {
     this.reportEditorStore.setChartWideEdit(chartId, enabled);

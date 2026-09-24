@@ -1,9 +1,14 @@
-import { Component, inject, signal, input } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 
 import { WeatherChart } from '../../../weather/ui/weather-chart/weather-chart';
 
 import type { ChartInput } from '../../models/report-editor.models';
 import { ReportLayoutState } from '../../state/report-layout-state';
+
+export interface ChartMoveRequest {
+  chartId: number;
+  direction: -1 | 1;
+}
 
 @Component({
   selector: 'app-report-charts',
@@ -16,13 +21,21 @@ export class ReportCharts {
 
   private readonly reportLayoutState = inject(ReportLayoutState);
   readonly showControlsToggle = input(false);
+  readonly showOrderControls = input(false);
+  readonly canMoveUp = input(false);
+  readonly canMoveDown = input(false);
+  readonly chartMoveRequested = output<ChartMoveRequest>();
 
-  controlsHidden(chartId: number): boolean{
+  controlsHidden(chartId: number): boolean {
     return this.reportLayoutState.controlsHidden(chartId);
   }
 
-  toggleControls(chartId: number): void{
+  toggleControls(chartId: number): void {
     this.reportLayoutState.toggleControls(chartId);
+  }
+
+  requestChartMove(chartId: number, direction: -1 | 1): void {
+    this.chartMoveRequested.emit({ chartId, direction });
   }
 
   toggleChart(chart: ChartInput): void {

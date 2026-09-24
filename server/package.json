@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --import tsx --test test/weather-analysis.spec.ts test/weather-validator.spec.ts test/moving-average.spec.ts test/report-validator.spec.ts",
+    "test": "node --import tsx --test test/weather-analysis.spec.ts test/weather-validator.spec.ts test/moving-average.spec.ts test/report-validator.spec.ts test/weather-cache.spec.ts",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "start": "node dist/server.js",

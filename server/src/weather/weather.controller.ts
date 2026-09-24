@@ -1,10 +1,34 @@
 import type { Request, Response } from 'express';
 
-import { analyzeWeatherRequest, WeatherUpstreamError } from './weather.service.js';
+import {
+  analyzeWeatherRequest,
+  planWeatherRequests,
+  WeatherUpstreamError,
+} from './weather.service.js';
 
-import { validateAnalysisRequest } from './weather.validator.js';
+import {
+  validateAnalysisPlan,
+  validateAnalysisRequest,
+} from './weather.validator.js';
 
-export async function postWeatherAnalysis(req: Request, res: Response): Promise<void> {
+export function postWeatherPlan(req: Request, res: Response): void {
+  const analyses = validateAnalysisPlan(req.body);
+
+  if (!analyses) {
+    res.status(400).json({
+      message: 'Invalid weather request plan',
+    });
+
+    return;
+  }
+
+  res.status(200).json(planWeatherRequests(analyses));
+}
+
+export async function postWeatherAnalysis(
+  req: Request,
+  res: Response,
+): Promise<void> {
   const analysis = validateAnalysisRequest(req.body);
 
   if (!analysis) {

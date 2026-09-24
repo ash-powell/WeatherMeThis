@@ -20,6 +20,35 @@
   margin-block: 0.83em;
 }
 
+.chart-order-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.chart-order-buttons button {
+  display: grid;
+  place-items: center;
+  min-width: 2.5rem;
+  min-height: 2rem;
+  padding: 0.15rem 0.5rem;
+
+  color: #002d7a;
+  background: white;
+  border: 1px solid #002d7a;
+  border-radius: 0.3rem;
+
+  font: inherit;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.chart-order-buttons button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .chart-heading-actions {
   display: flex;
   align-items: center;
@@ -43,12 +72,14 @@
 }
 
 .chart-collapse-toggle:focus-visible,
-.chart-controls-toggle:focus-visible {
+.chart-controls-toggle:focus-visible,
+.chart-order-buttons button:focus-visible {
   outline: 2px solid #0b64d0;
   outline-offset: 2px;
 }
 
 @media (hover: hover) {
+  .chart-order-buttons button:not(:disabled):hover,
   .chart-collapse-toggle:hover,
   .chart-controls-toggle:hover {
     color: #002d7a;
@@ -89,6 +120,7 @@
 }
 
 @media (max-width: 42rem) {
+  .chart-order-buttons button,
   .chart-collapse-toggle,
   .chart-controls-toggle {
     min-height: 44px;

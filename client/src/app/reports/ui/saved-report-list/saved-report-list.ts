@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, HostListener, input, output, signal } from '@angular/core';
 
-import type { SavedReport } from '../../models/report.models';
+import type { SavedReportSummary } from '../../models/report.models';
 
 @Component({
   selector: 'app-saved-report-list',
@@ -10,11 +10,11 @@ import type { SavedReport } from '../../models/report.models';
   styleUrl: './saved-report-list.scss',
 })
 export class SavedReportList {
-  readonly reports = input.required<SavedReport[]>();
+  readonly reports = input.required<SavedReportSummary[]>();
   readonly loading = input(false);
 
   readonly closed = output<void>();
-  readonly reportSelected = output<SavedReport>();
+  readonly reportSelected = output<SavedReportSummary>();
 
   readonly searchText = signal('');
   readonly sortOrder = signal<SavedReportSort>('dateNewest');

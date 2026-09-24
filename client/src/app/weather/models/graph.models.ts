@@ -9,4 +9,5 @@ export interface GraphSeries {
   points: GraphPoint[];
   yAxisId: string;
   yAxisLabel: string;
+  requestKey?: string;
 }

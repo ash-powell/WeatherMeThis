@@ -32,6 +32,7 @@ export interface SeriesRequest {
 
 export interface ChartDataRequest {
   chartId: number;
+  seriesId: number;
   chartType: ChartType;
 }
 
@@ -92,6 +93,12 @@ export class ReportEditor {
     this.reportFacade.moveChart(chartId, direction);
   }
 
+  moveSeries(chartId: number, seriesId: number, direction: -1 | 1, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.reportFacade.moveSeries(chartId, seriesId, direction);
+  }
+
   activeHelp: HelpTopic | null = null;
   helpSeries: SeriesInput | null = null;
 
@@ -114,7 +121,7 @@ export class ReportEditor {
   }
 
   addChart(afterChartId: number): void {
-    const addedChartId = this.reportFacade.addChart(afterChartId);
+    const addedChartId = this.reportFacade.addChart(afterChartId, this.autopopulate());
 
     if (addedChartId === null) return;
 
@@ -152,23 +159,17 @@ export class ReportEditor {
   }
 
   addSeries(chartId: number, sourceSeriesId: number): void {
-    const addedSeriesId = this.reportFacade.addSeries(
-      chartId,
-      sourceSeriesId,
-      this.autopopulate(),
-    );
+    const addedSeriesId = this.reportFacade.addSeries(chartId, sourceSeriesId, this.autopopulate());
 
     if (addedSeriesId === null) {
       return;
     }
 
     setTimeout(() => {
-      document
-        .getElementById(`series-editor-${addedSeriesId}`)
-        ?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
+      document.getElementById(`series-editor-${addedSeriesId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
     });
   }
 
@@ -254,9 +255,10 @@ export class ReportEditor {
     this.reportFacade.selectLocation(chartId, seriesId, location);
   }
 
-  getWeatherData(chartId: number): void {
+  getWeatherData(chartId: number, seriesId: number): void {
     this.weatherDataRequested.emit({
       chartId,
+      seriesId,
       chartType: this.pendingChartType(chartId),
     });
   }

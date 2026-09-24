@@ -9,7 +9,7 @@
     >
       <!--------------- Iterate over series to build each form --------------->
 
-      @for (series of chart.seriesInputs; track series.seriesId) {
+      @for (series of chart.seriesInputs; track series.seriesId; let seriesIndex = $index) {
         <details
           class="series-details"
           [id]="'series-editor-' + series.seriesId"
@@ -17,12 +17,34 @@
           (toggle)="setSeriesExpanded(chart.chartId, series.seriesId, $event)"
         >
           <summary class="series-summary">
-            <span>
-              Series {{ $index + 1 }}
+            <span class="series-summary-main">
+              <span class="series-order-buttons" aria-label="Series order controls">
+                <button
+                  type="button"
+                  [disabled]="seriesIndex === 0"
+                  [attr.aria-label]="'Move series ' + (seriesIndex + 1) + ' up'"
+                  (click)="moveSeries(chart.chartId, series.seriesId, -1, $event)"
+                >
+                  ↑
+                </button>
 
-              @if (series.city) {
-                — {{ series.city }}
-              }
+                <button
+                  type="button"
+                  [disabled]="seriesIndex === chart.seriesInputs.length - 1"
+                  [attr.aria-label]="'Move series ' + (seriesIndex + 1) + ' down'"
+                  (click)="moveSeries(chart.chartId, series.seriesId, 1, $event)"
+                >
+                  ↓
+                </button>
+              </span>
+
+              <span>
+                Series {{ seriesIndex + 1 }}
+
+                @if (series.city) {
+                  — {{ series.city }}
+                }
+              </span>
             </span>
           </summary>
 
@@ -453,7 +475,7 @@
                 <button
                   type="button"
                   class="app-button app-button--primary"
-                  (click)="getWeatherData(chart.chartId)"
+                  (click)="getWeatherData(chart.chartId, series.seriesId)"
                 >
                   Get Data
                 </button>
@@ -481,7 +503,7 @@
                 </label>
               </div>
 
-              <div id="add-series-plus-auto">
+              <div id="add-series-plus-auto" class="add-with-autopopulate">
                 <button
                   type="button"
                   id="add-series-button"
@@ -551,28 +573,6 @@
           class="chart-position mobile-hide-until-chart"
           [class.mobile-before-data]="chart.graphSeries.length === 0"
         >
-          <div class="chart-order-buttons">
-            <button
-              type="button"
-              class="app-button app-button--secondary"
-              [disabled]="chartIndex === 0"
-              [attr.aria-label]="'Move chart ' + (chartIndex + 1) + ' up'"
-              (click)="moveChart(chart.chartId, -1)"
-            >
-              ↑
-            </button>
-
-            <button
-              type="button"
-              class="app-button app-button--secondary"
-              [disabled]="chartIndex === report().charts.length - 1"
-              [attr.aria-label]="'Move chart ' + (chartIndex + 1) + ' down'"
-              (click)="moveChart(chart.chartId, 1)"
-            >
-              ↓
-            </button>
-          </div>
-
           <h2>Chart {{ chartIndex + 1 }}</h2>
         </div>
 
@@ -600,13 +600,25 @@
           Delete Chart
         </button>
 
-        <button
-          type="button"
-          class="app-button app-button--secondary add-chart-button"
-          (click)="addChart(chart.chartId)"
-        >
-          Add Chart
-        </button>
+        <div class="add-with-autopopulate">
+          <button
+            type="button"
+            class="app-button app-button--secondary add-chart-button"
+            (click)="addChart(chart.chartId)"
+          >
+            Add Chart
+          </button>
+
+          <label class="autopopulate-control">
+            <input
+              type="checkbox"
+              [ngModel]="autopopulate()"
+              (ngModelChange)="autopopulate.set($event)"
+            />
+
+            Autopopulate
+          </label>
+        </div>
 
         <button
           type="button"
@@ -631,7 +643,14 @@
       </div>
     </section>
 
-    <app-report-charts [charts]="[chart]" [showControlsToggle]="true" />
+    <app-report-charts
+      [charts]="[chart]"
+      [showControlsToggle]="true"
+      [showOrderControls]="true"
+      [canMoveUp]="chartIndex > 0"
+      [canMoveDown]="chartIndex < report().charts.length - 1"
+      (chartMoveRequested)="moveChart($event.chartId, $event.direction)"
+    />
   }
 </section>
 

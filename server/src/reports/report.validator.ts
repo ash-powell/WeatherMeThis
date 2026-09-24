@@ -1,4 +1,10 @@
-import type { ChartType, ReportChart, ReportRequest, ReportSeries } from './report.models.js';
+import type {
+  ChartType,
+  ReportChart,
+  ReportRequest,
+  ReportSeries,
+  ReportSeriesResult,
+} from './report.models.js';
 
 import {
   hasValidMovingAverageOptions,
@@ -16,6 +22,49 @@ function readChartType(value: unknown): ChartType | null {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function validateRenderedSeries(value: unknown): ReportSeriesResult | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  if (
+    typeof value.label !== 'string' ||
+    value.label.length > 200 ||
+    typeof value.yAxisId !== 'string' ||
+    value.yAxisId.length > 100 ||
+    typeof value.yAxisLabel !== 'string' ||
+    value.yAxisLabel.length > 100 ||
+    (value.requestKey !== undefined &&
+      (typeof value.requestKey !== 'string' ||
+        value.requestKey.length > 2_000)) ||
+    !Array.isArray(value.dates) ||
+    !Array.isArray(value.values) ||
+    value.dates.length !== value.values.length ||
+    value.dates.length > 100_000 ||
+    !value.dates.every(
+      (date) => typeof date === 'string' && date.length <= 32,
+    ) ||
+    !value.values.every(
+      (pointValue) =>
+        pointValue === null ||
+        (typeof pointValue === 'number' && Number.isFinite(pointValue)),
+    )
+  ) {
+    return null;
+  }
+
+  return {
+    label: value.label,
+    yAxisId: value.yAxisId,
+    yAxisLabel: value.yAxisLabel,
+    ...(typeof value.requestKey === 'string'
+      ? { requestKey: value.requestKey }
+      : {}),
+    dates: value.dates,
+    values: value.values,
+  };
 }
 
 export function validateReportRequest(value: unknown): ReportRequest | null {
@@ -44,7 +93,10 @@ export function validateReportRequest(value: unknown): ReportRequest | null {
       return null;
     }
 
-    if (chartValue.metricUnits !== undefined && typeof chartValue.metricUnits !== 'boolean')
+    if (
+      chartValue.metricUnits !== undefined &&
+      typeof chartValue.metricUnits !== 'boolean'
+    )
       return null;
 
     const groupBy = chartValue.groupBy;
@@ -84,7 +136,8 @@ export function validateReportRequest(value: unknown): ReportRequest | null {
 
       if (
         movingAverageWindow !== null &&
-        (typeof movingAverageWindow !== 'number' || !Number.isFinite(movingAverageWindow))
+        (typeof movingAverageWindow !== 'number' ||
+          !Number.isFinite(movingAverageWindow))
       ) {
         return null;
       }
@@ -101,15 +154,45 @@ export function validateReportRequest(value: unknown): ReportRequest | null {
 
       if (
         seriesValue.title !== undefined &&
-        (typeof seriesValue.title !== 'string' || seriesValue.title.length > 100)
+        (typeof seriesValue.title !== 'string' ||
+          seriesValue.title.length > 100)
       ) {
         return null;
       }
       seriesArray.push({
         ...series,
-        title: typeof seriesValue.title === 'string' ? seriesValue.title.trim() : '',
+        title:
+          typeof seriesValue.title === 'string' ? seriesValue.title.trim() : '',
         movingAverageWindow,
       });
+    }
+
+    let renderedSeries: Array<ReportSeriesResult | null> | undefined;
+
+    if (chartValue.renderedSeries !== undefined) {
+      if (
+        !Array.isArray(chartValue.renderedSeries) ||
+        chartValue.renderedSeries.length !== seriesArray.length
+      ) {
+        return null;
+      }
+
+      renderedSeries = [];
+
+      for (const resultValue of chartValue.renderedSeries) {
+        if (resultValue === null) {
+          renderedSeries.push(null);
+          continue;
+        }
+
+        const result = validateRenderedSeries(resultValue);
+
+        if (!result) {
+          return null;
+        }
+
+        renderedSeries.push(result);
+      }
     }
 
     charts.push({
@@ -123,6 +206,7 @@ export function validateReportRequest(value: unknown): ReportRequest | null {
       metricUnits: chartValue.metricUnits === true,
       groupBy,
       seriesArray,
+      ...(renderedSeries ? { renderedSeries } : {}),
     });
   }
 

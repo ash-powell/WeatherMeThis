@@ -1,8 +1,9 @@
 import type { ReportInput } from '../models/report-editor.models';
 
-import type { ReportRequest, ReportSeries } from '../models/report.models';
+import type { ReportRequest, ReportSeries, ReportSeriesResult } from '../models/report.models';
 
 import type { AnalysisRequest, GroupBy } from '../../weather/models/analysis.models';
+import { analysisRequestKey } from '../../weather/domain/analysis-request-key';
 
 import type { BuildResult } from './build-result';
 
@@ -50,19 +51,17 @@ export function buildReportRequest(report: ReportInput): BuildResult<ReportReque
     }
 
     const seriesArray: ReportSeries[] = [];
+    const analyses: AnalysisRequest[] = [];
 
     for (const series of chart.seriesInputs) {
-      const analysisResult = buildAnalysisRequest(
-        series,
-        chart.groupBy,
-        chart.metricUnits,
-      );
+      const analysisResult = buildAnalysisRequest(series, chart.groupBy, chart.metricUnits);
 
       if (!analysisResult.ok) {
         return analysisResult;
       }
 
       const analysis = analysisResult.value;
+      analyses.push(analysis);
 
       seriesArray.push({
         title: series.title?.trim() || '',
@@ -86,6 +85,24 @@ export function buildReportRequest(report: ReportInput): BuildResult<ReportReque
       metricUnits: chart.metricUnits,
       groupBy: chart.groupBy,
       seriesArray,
+      renderedSeries: chart.seriesInputs.map((series, seriesIndex): ReportSeriesResult | null => {
+        const rendered = chart.graphSeries.find(
+          (graphSeries) => graphSeries.seriesId === series.seriesId,
+        );
+
+        if (!rendered || rendered.requestKey !== analysisRequestKey(analyses[seriesIndex])) {
+          return null;
+        }
+
+        return {
+          label: rendered.label,
+          yAxisId: rendered.yAxisId,
+          yAxisLabel: rendered.yAxisLabel,
+          ...(rendered.requestKey ? { requestKey: rendered.requestKey } : {}),
+          dates: rendered.points.map((point) => point.date),
+          values: rendered.points.map((point) => point.value),
+        };
+      }),
     });
   }
 

@@ -4,7 +4,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import type { ReportRequest, SavedReport } from '../models/report.models';
+import type { ReportRequest, SavedReport, SavedReportSummary } from '../models/report.models';
 
 export interface SaveReportResponse {
   message: string;
@@ -23,8 +23,12 @@ export class ReportApi {
     return this.http.post<SaveReportResponse>(this.reportsUrl, report);
   }
 
-  getAll(): Observable<SavedReport[]> {
-    return this.http.get<SavedReport[]>(this.reportsUrl);
+  getAll(): Observable<SavedReportSummary[]> {
+    return this.http.get<SavedReportSummary[]>(this.reportsUrl);
+  }
+
+  getById(reportId: string): Observable<SavedReport> {
+    return this.http.get<SavedReport>(`${this.reportsUrl}/${reportId}`);
   }
 
   update(reportId: string, report: ReportRequest): Observable<unknown> {

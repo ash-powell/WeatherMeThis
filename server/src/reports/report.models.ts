@@ -11,6 +11,15 @@ export interface ReportSeries extends AnalysisSeries {
   movingAverageWindow: number | null;
 }
 
+export interface ReportSeriesResult {
+  label: string;
+  yAxisId: string;
+  yAxisLabel: string;
+  requestKey?: string;
+  dates: string[];
+  values: Array<number | null>;
+}
+
 export type ChartType = 'line' | 'bar';
 
 export interface ReportChart {
@@ -20,6 +29,7 @@ export interface ReportChart {
   chartType: ChartType;
   groupBy: GroupBy;
   seriesArray: ReportSeries[];
+  renderedSeries?: Array<ReportSeriesResult | null>;
 }
 
 export interface ReportRequest {
